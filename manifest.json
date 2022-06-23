@@ -1,0 +1,10 @@
+{
+    "name": "LeadAHorseToWater",
+    "version_number": "0.2.0",
+    "website_url": "https://github.com/decaprime/LeadAHorseToWater",
+    "description": "Lets your horses drink water from wells.",
+    "dependencies": [
+        "BepInEx-BepInExPack_V_Rising-1.0.0", 
+        "molenzwiebel-Wetstone-1.1.0"
+    ]
+}
