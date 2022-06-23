@@ -1,6 +1,6 @@
 # 🐴 Lead A Horse To Water
 
-This is a V-Rising mod that let's your horses drink water from wells.
+A V-Rising mod that lets your horses drink water from wells.
 
 ## Motivation
 <img src="https://user-images.githubusercontent.com/62450933/175367019-be27ef84-4676-45cc-809c-41e7244d3594.png" width="300" />
