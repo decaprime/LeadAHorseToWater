@@ -79,7 +79,8 @@ namespace LeadAHorseToWater
 					var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(
 						ComponentType.ReadOnly<Team>(),
 						ComponentType.ReadOnly<CastleHeartConnection>(),
-						ComponentType.ReadOnly<BlueprintData>()
+						ComponentType.ReadOnly<BlueprintData>(),
+						ComponentType.ReadOnly<LocalToWorld>()
 					);
 
 					var wellEntities = wellQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
@@ -99,7 +100,7 @@ namespace LeadAHorseToWater
 
 
 					// Find Horses
-					var feedQuery = __instance.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<FeedableInventory>(), ComponentType.ReadWrite<NameableInteractable>());
+					var feedQuery = __instance.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<FeedableInventory>(), ComponentType.ReadWrite<NameableInteractable>(), ComponentType.ReadOnly<LocalToWorld>());
 					var feedInvEntityQuery = feedQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
 					foreach (var inventoryEntity in feedInvEntityQuery)
 					{
@@ -156,7 +157,6 @@ namespace LeadAHorseToWater
 			}
 
 			private static Vector3 FromFloat3(float3 vec) => new Vector3(vec.x, vec.y, vec.z);
-
 		}
 	}
 }
