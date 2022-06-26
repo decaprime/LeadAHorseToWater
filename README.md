@@ -28,6 +28,16 @@ SecondsDrinkPerTick = 30
 # Default value: 28800
 MaxDrinkAmount = 28800
 
+## If true will rename horses in drinking range with the DrinkingPrefix
+# Setting type: Boolean
+# Default value: true
+EnableRename = true
+
+## If true use a different color for the DrinkingPrefix
+# Setting type: Boolean
+# Default value: true
+EnablePrefixColor = true
+
 ## Prefix to use on horses that are drinking
 # Setting type: String
 # Default value: [Drinking] 
