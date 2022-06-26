@@ -27,6 +27,9 @@ namespace LeadAHorseToWater
 		public static ConfigEntry<int> SECONDS_DRINK_PER_TICK;
 		public static ConfigEntry<int> MAX_DRINK_AMOUNT;
 		private static ConfigEntry<string> DRINKING_PREFIX;
+		private static ConfigEntry<bool> ENABLE_RENAME;
+		private static ConfigEntry<bool> ENABLE_PREFIX_COLOR;
+
 
 		private HarmonyLib.Harmony _harmony;
 		public override void Load()
@@ -37,6 +40,9 @@ namespace LeadAHorseToWater
 			DISTANCE_REQUIRED = Config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be within this distance from well. (5 =1 tile)");
 			SECONDS_DRINK_PER_TICK = Config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 			MAX_DRINK_AMOUNT = Config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");
+			
+			ENABLE_RENAME = Config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with the DrinkingPrefix");
+			ENABLE_PREFIX_COLOR = Config.Bind<bool>("Server", "EnablePrefixColor", true, "If true use a different color for the DrinkingPrefix");
 			DRINKING_PREFIX = Config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "Prefix to use on horses that are drinking");
 
 			// Server plugin check
@@ -140,10 +146,14 @@ namespace LeadAHorseToWater
 							}
 						}
 
+						if (!ENABLE_RENAME.Value) continue;
+
 						horseEntity.WithComponentData<NameableInteractable>((ref NameableInteractable nameable) =>
 						{
 							var name = nameable.Name.ToString();
-							var prefix = $"<color=#0ef>{DRINKING_PREFIX.Value}</color> ";
+							var prefix = ENABLE_PREFIX_COLOR.Value ?
+								$"<color=#0ef>{DRINKING_PREFIX.Value}</color> " :
+								$"{DRINKING_PREFIX.Value} ";
 							bool hasPrefix = name.StartsWith(prefix);
 
 							if (!closeEnough && hasPrefix)
