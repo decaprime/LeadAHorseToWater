@@ -74,7 +74,6 @@ namespace LeadAHorseToWater
 
 					NoUpdateBefore = DateTime.Now.AddMilliseconds(1500);
 
-
 					// Find Wells (TODO: Possibly Async of Update)
 					var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(
 						ComponentType.ReadOnly<Team>(),
@@ -98,13 +97,33 @@ namespace LeadAHorseToWater
 						}
 					}
 
-
 					// Find Horses
-					var feedQuery = __instance.EntityManager.CreateEntityQuery(ComponentType.ReadWrite<FeedableInventory>(), ComponentType.ReadWrite<NameableInteractable>(), ComponentType.ReadOnly<LocalToWorld>());
-					var feedInvEntityQuery = feedQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-					foreach (var inventoryEntity in feedInvEntityQuery)
+					// - Question: which one of these is lost when you get on the mount?
+					var horseQuery = __instance.EntityManager.CreateEntityQuery(
+						ComponentType.ReadWrite<FeedableInventory>(),
+						ComponentType.ReadWrite<NameableInteractable>(),
+						ComponentType.ReadOnly<Team>()
+					);
+
+					var horseEntityQuery = horseQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+
+					var ids = new List<string>();
+					foreach (var horseEntity in horseEntityQuery)
 					{
-						var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(inventoryEntity);
+						ids.Add(horseEntity.Index.ToString());
+					}
+
+					logger?.LogDebug($"Found {horseEntityQuery.Length} horses with Ids [{string.Join(", ", ids)}]");
+
+					foreach (var horseEntity in horseEntityQuery)
+					{
+						if (!VWorld.Server.EntityManager.HasComponent(horseEntity, ComponentType.ReadOnly<LocalToWorld>()))
+						{
+							logger?.LogWarning($"Horse <{horseEntity.Index}> No location identified, was this maybe culled or still loading?");
+							continue;
+						}
+
+						var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horseEntity);
 						var horsePosition = FromFloat3(localToWorld.Position);
 
 						logger?.LogDebug($"Horse Found at {horsePosition}:");
@@ -121,7 +140,7 @@ namespace LeadAHorseToWater
 							}
 						}
 
-						inventoryEntity.WithComponentData<NameableInteractable>((ref NameableInteractable nameable) =>
+						horseEntity.WithComponentData<NameableInteractable>((ref NameableInteractable nameable) =>
 						{
 							var name = nameable.Name.ToString();
 							var prefix = $"<color=#0ef>{DRINKING_PREFIX.Value}</color> ";
@@ -142,11 +161,13 @@ namespace LeadAHorseToWater
 
 						if (!closeEnough) continue;
 
-						inventoryEntity.WithComponentData<FeedableInventory>((ref FeedableInventory inventory) =>
+						if (!IsHorseWeFeed(horseEntity, __instance)) continue;
+
+						horseEntity.WithComponentData<FeedableInventory>((ref FeedableInventory inventory) =>
 						{
-							logger?.LogDebug($"Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
-							if (inventory.FeedProgressTime == 0 && !inventory.IsFed) return; // not 'tagged' horses?
+							logger?.LogDebug($"Horse <{horseEntity.Index}> Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
 							inventory.FeedProgressTime = Mathf.Min(inventory.FeedProgressTime + SECONDS_DRINK_PER_TICK.Value, MAX_DRINK_AMOUNT.Value);
+							inventory.IsFed = true; // don't drink canteens?
 						});
 					}
 				}
@@ -154,6 +175,17 @@ namespace LeadAHorseToWater
 				{
 					logger?.LogError(e.ToString());
 				}
+			}
+
+			private static bool IsHorseWeFeed(Entity horse, ComponentSystemBase instance)
+			{
+				var tc = TeamChecker.CreateWithoutCache(instance);
+				var horseTeam = tc.GetTeam(horse);
+				var isUnit = tc.IsUnit(horseTeam);
+				logger?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
+
+				// Wild horses are Units, appear to no longer be units after you ride them.
+				return !isUnit;
 			}
 
 			private static Vector3 FromFloat3(float3 vec) => new Vector3(vec.x, vec.y, vec.z);
