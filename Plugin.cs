@@ -40,7 +40,7 @@ namespace LeadAHorseToWater
 			DISTANCE_REQUIRED = Config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be within this distance from well. (5 =1 tile)");
 			SECONDS_DRINK_PER_TICK = Config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 			MAX_DRINK_AMOUNT = Config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");
-			
+
 			ENABLE_RENAME = Config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with the DrinkingPrefix");
 			ENABLE_PREFIX_COLOR = Config.Bind<bool>("Server", "EnablePrefixColor", true, "If true use a different color for the DrinkingPrefix");
 			DRINKING_PREFIX = Config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "Prefix to use on horses that are drinking");
@@ -146,28 +146,7 @@ namespace LeadAHorseToWater
 							}
 						}
 
-						if (!ENABLE_RENAME.Value) continue;
-
-						horseEntity.WithComponentData<NameableInteractable>((ref NameableInteractable nameable) =>
-						{
-							var name = nameable.Name.ToString();
-							var prefix = ENABLE_PREFIX_COLOR.Value ?
-								$"<color=#0ef>{DRINKING_PREFIX.Value}</color> " :
-								$"{DRINKING_PREFIX.Value} ";
-							bool hasPrefix = name.StartsWith(prefix);
-
-							if (!closeEnough && hasPrefix)
-							{
-								nameable.Name = name.Substring(prefix.Length);
-								return;
-							}
-
-							if (closeEnough && !hasPrefix)
-							{
-								nameable.Name = prefix + name;
-								return;
-							}
-						});
+						HandleRename(horseEntity, closeEnough);
 
 						if (!closeEnough) continue;
 
@@ -185,6 +164,32 @@ namespace LeadAHorseToWater
 				{
 					logger?.LogError(e.ToString());
 				}
+			}
+
+			private static void HandleRename(Entity horseEntity, bool closeEnough)
+			{
+				if (!ENABLE_RENAME.Value) return;
+
+				horseEntity.WithComponentData<NameableInteractable>((ref NameableInteractable nameable) =>
+				{
+					var name = nameable.Name.ToString();
+					var prefix = ENABLE_PREFIX_COLOR.Value ?
+						$"<color=#0ef>{DRINKING_PREFIX.Value}</color> " :
+						$"{DRINKING_PREFIX.Value} ";
+					bool hasPrefix = name.StartsWith(prefix);
+
+					if (!closeEnough && hasPrefix)
+					{
+						nameable.Name = name.Substring(prefix.Length);
+						return;
+					}
+
+					if (closeEnough && !hasPrefix)
+					{
+						nameable.Name = prefix + name;
+						return;
+					}
+				});
 			}
 
 			private static bool IsHorseWeFeed(Entity horse, ComponentSystemBase instance)
