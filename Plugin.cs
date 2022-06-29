@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.CastleBuilding;
+using ProjectM.CastleBuilding.Placement;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -63,10 +64,44 @@ namespace LeadAHorseToWater
 			return true;
 		}
 
+		[HarmonyPatch(typeof(PlaceTileModelSystem))]
+		public static class PlaceTileModelSystem_Patches
+		{
+			[HarmonyPostfix]
+			[HarmonyPatch(nameof(PlaceTileModelSystem.ClearEditing))]
+			public static void Moving()
+			{
+
+				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
+				logger?.LogDebug("Pseudo Moving Event");
+			}
+
+			[HarmonyPostfix]
+			[HarmonyPatch(nameof(PlaceTileModelSystem.VerifyCanBuildTileModels))]
+			public static void Destroying()
+			{
+
+				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
+				logger?.LogDebug("Pseudo Destroying Event");
+			}
+
+			[HarmonyPostfix]
+			[HarmonyPatch(nameof(PlaceTileModelSystem.HasUnlockedBlueprint))]
+			public static void Building()
+			{
+				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
+				logger?.LogDebug("Pseudo Building Event");
+			}
+		}
+
 		[HarmonyPatch(typeof(FeedableInventorySystem_Update), "OnUpdate")]
 		public static class FeedSystem_Update_OnUpdate_Patch
 		{
+			public static bool InvalidateWellCache = true;
 			private static DateTime NoUpdateBefore = DateTime.MinValue;
+			private static DateTime NextWellCheck = DateTime.MinValue;
+
+			private static List<Vector3> wellLocations;
 
 			public static void Prefix(FeedableInventorySystem_Update __instance)
 			{
@@ -77,7 +112,7 @@ namespace LeadAHorseToWater
 						return;
 					}
 
-					NoUpdateBefore = DateTime.Now.AddSeconds(5);
+					NoUpdateBefore = DateTime.Now.AddSeconds(1.5);
 
 					var horseEntityQuery = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
 
@@ -86,31 +121,38 @@ namespace LeadAHorseToWater
 						return;
 					}
 
-					// Find Wells (TODO: Possibly Async of Update)
-					var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
+					// Find Wells
+					if (InvalidateWellCache || DateTime.Now > NextWellCheck)
 					{
-						All = new ComponentType[] {
+						NextWellCheck = DateTime.Now.AddSeconds(90);
+
+						var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
+						{
+							All = new ComponentType[] {
 							ComponentType.ReadOnly<Team>(),
 							ComponentType.ReadOnly<CastleHeartConnection>(),
 							ComponentType.ReadOnly<BlueprintData>(),
 							ComponentType.ReadOnly<LocalToWorld>()
 						},
-						Options = EntityQueryOptions.IncludeDisabled
-					});
+							Options = EntityQueryOptions.IncludeDisabled
+						});
 
-					var wellEntities = wellQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-					var count = 0;
-					var wellLocations = new List<Vector3>();
-					foreach (var well in wellEntities)
-					{
-						count++;
-						var blueprintData = VWorld.Server.EntityManager.GetComponentData<BlueprintData>(well);
-						var location = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(well);
-						if (blueprintData.Guid.GuidHash == 986517450)
+						var wellEntities = wellQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+						var count = 0;
+						wellLocations = new List<Vector3>();
+						foreach (var well in wellEntities)
 						{
-							logger?.LogDebug($"Well Found: [{count}]: Blueprint GUID={blueprintData.Guid}, Location={location.Position}");
-							wellLocations.Add(FromFloat3(location.Position));
+							count++;
+							var blueprintData = VWorld.Server.EntityManager.GetComponentData<BlueprintData>(well);
+							var location = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(well);
+							if (blueprintData.Guid.GuidHash == 986517450)
+							{
+								logger?.LogDebug($"Well Found: [{count}]: Blueprint GUID={blueprintData.Guid}, Location={location.Position}");
+								wellLocations.Add(FromFloat3(location.Position));
+							}
 						}
+
+						InvalidateWellCache = false;
 					}
 
 					foreach (var horseEntity in horseEntityQuery)
