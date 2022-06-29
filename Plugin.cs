@@ -5,7 +5,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.CastleBuilding;
-using ProjectM.Gameplay;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -65,7 +64,7 @@ namespace LeadAHorseToWater
 		}
 
 		[HarmonyPatch(typeof(FeedableInventorySystem_Update), "OnUpdate")]
-		public static class FeedSystem_OnUpdate_Patch
+		public static class FeedSystem_Update_OnUpdate_Patch
 		{
 			private static DateTime NoUpdateBefore = DateTime.MinValue;
 
@@ -78,15 +77,26 @@ namespace LeadAHorseToWater
 						return;
 					}
 
-					NoUpdateBefore = DateTime.Now.AddMilliseconds(1500);
+					NoUpdateBefore = DateTime.Now.AddSeconds(5);
+
+					var horseEntityQuery = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+
+					if (horseEntityQuery.Length == 0)
+					{
+						return;
+					}
 
 					// Find Wells (TODO: Possibly Async of Update)
-					var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(
-						ComponentType.ReadOnly<Team>(),
-						ComponentType.ReadOnly<CastleHeartConnection>(),
-						ComponentType.ReadOnly<BlueprintData>(),
-						ComponentType.ReadOnly<LocalToWorld>()
-					);
+					var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
+					{
+						All = new ComponentType[] {
+							ComponentType.ReadOnly<Team>(),
+							ComponentType.ReadOnly<CastleHeartConnection>(),
+							ComponentType.ReadOnly<BlueprintData>(),
+							ComponentType.ReadOnly<LocalToWorld>()
+						},
+						Options = EntityQueryOptions.IncludeDisabled
+					});
 
 					var wellEntities = wellQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
 					var count = 0;
@@ -103,36 +113,14 @@ namespace LeadAHorseToWater
 						}
 					}
 
-					// Find Horses
-					// - Question: which one of these is lost when you get on the mount?
-					var horseQuery = __instance.EntityManager.CreateEntityQuery(
-						ComponentType.ReadWrite<FeedableInventory>(),
-						ComponentType.ReadWrite<NameableInteractable>(),
-						ComponentType.ReadOnly<Team>()
-					);
-
-					var horseEntityQuery = horseQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-
-					var ids = new List<string>();
 					foreach (var horseEntity in horseEntityQuery)
 					{
-						ids.Add(horseEntity.Index.ToString());
-					}
-
-					logger?.LogDebug($"Found {horseEntityQuery.Length} horses with Ids [{string.Join(", ", ids)}]");
-
-					foreach (var horseEntity in horseEntityQuery)
-					{
-						if (!VWorld.Server.EntityManager.HasComponent(horseEntity, ComponentType.ReadOnly<LocalToWorld>()))
-						{
-							logger?.LogWarning($"Horse <{horseEntity.Index}> No location identified, was this maybe culled or still loading?");
-							continue;
-						}
+						if (!IsHorseWeFeed(horseEntity, __instance)) continue;
 
 						var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horseEntity);
 						var horsePosition = FromFloat3(localToWorld.Position);
 
-						logger?.LogDebug($"Horse Found at {horsePosition}:");
+						logger?.LogDebug($"Horse <{horseEntity.Index}> Found at {horsePosition}:");
 						bool closeEnough = false;
 						foreach (var wellPosition in wellLocations)
 						{
@@ -150,11 +138,9 @@ namespace LeadAHorseToWater
 
 						if (!closeEnough) continue;
 
-						if (!IsHorseWeFeed(horseEntity, __instance)) continue;
-
 						horseEntity.WithComponentData<FeedableInventory>((ref FeedableInventory inventory) =>
 						{
-							logger?.LogDebug($"Horse <{horseEntity.Index}> Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
+							logger?.LogDebug($"Feeding horse <{horseEntity.Index}> Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
 							inventory.FeedProgressTime = Mathf.Min(inventory.FeedProgressTime + SECONDS_DRINK_PER_TICK.Value, MAX_DRINK_AMOUNT.Value);
 							inventory.IsFed = true; // don't drink canteens?
 						});

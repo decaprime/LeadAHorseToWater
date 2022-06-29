@@ -4,7 +4,7 @@
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<AssemblyName>LeadAHorseToWater</AssemblyName>
 		<Description>Lead a horse to a well to make it drink.</Description>
-		<Version>0.3.0</Version>
+		<Version>0.3.6</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
