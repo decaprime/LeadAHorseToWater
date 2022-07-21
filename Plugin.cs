@@ -4,10 +4,9 @@ using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
 using ProjectM;
-using ProjectM.CastleBuilding;
 using ProjectM.CastleBuilding.Placement;
+using ProjectM.Network;
 using System;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -20,7 +19,7 @@ namespace LeadAHorseToWater
 	[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 	[BepInDependency("xyz.molenzwiebel.wetstone")]
 	[Wetstone.API.Reloadable]
-	public class Plugin : BasePlugin
+	public partial class Plugin : BasePlugin
 	{
 		public static ManualLogSource logger;
 		public static ConfigEntry<float> DISTANCE_REQUIRED;
@@ -69,39 +68,42 @@ namespace LeadAHorseToWater
 		{
 			[HarmonyPostfix]
 			[HarmonyPatch(nameof(PlaceTileModelSystem.ClearEditing))]
-			public static void Moving()
+			public static void Moving(PlaceTileModelSystem __instance, EntityManager entityManager, Entity tileModelEntity, Entity character)
 			{
-
-				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
-				logger?.LogDebug("Pseudo Moving Event");
+				// ideally we can just invalidate this tileModelEntity and get it's location ext hooked update
+				FeedSystemUpdatePatch.Wells.InvalidateEntity(tileModelEntity);
+				logger?.LogDebug($"Pseudo Moving Event Entity:{tileModelEntity.Index}");
 			}
 
 			[HarmonyPostfix]
 			[HarmonyPatch(nameof(PlaceTileModelSystem.VerifyCanBuildTileModels))]
-			public static void Destroying()
+			public static void Destroying(PlaceTileModelSystem __instance, EntityManager entityManager, Entity character)
 			{
-
-				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
-				logger?.LogDebug("Pseudo Destroying Event");
+				// we don't even need the entity id, just that a well was destroyed so we can invalidate the cache
+				// and search for which entities no longer match a well. We may also scan for some in-destruction event/component.
+				// we can also use the location to filter our cache and only invalidate the wells near the destroying player.			
+				FeedSystemUpdatePatch.Wells.InvalidateAll();
+				logger?.LogDebug($"Pseudo Destroy Event");
 			}
 
 			[HarmonyPostfix]
 			[HarmonyPatch(nameof(PlaceTileModelSystem.HasUnlockedBlueprint))]
-			public static void Building()
+			public static void Building(PlaceTileModelSystem __instance, Entity user, PrefabGUID prefabGuid, Entity prefab)
 			{
-				FeedSystem_Update_OnUpdate_Patch.InvalidateWellCache = true;
-				logger?.LogDebug("Pseudo Building Event");
+				if (!WellCache.IsWellPrefab(prefabGuid)) return;
+				// we need to scan again if we build, new entity id will need to be tracked, is this prefab entity id the well id?
+				// however we can do an 'active' component scan to find the well id since it should be near a player
+				FeedSystemUpdatePatch.Wells.PlanScanForAdded();
+				logger?.LogDebug($"Pseudo Building Event prefab: {prefabGuid}, entity: {prefab.Index}");
 			}
 		}
 
 		[HarmonyPatch(typeof(FeedableInventorySystem_Update), "OnUpdate")]
-		public static class FeedSystem_Update_OnUpdate_Patch
+		public static class FeedSystemUpdatePatch
 		{
-			public static bool InvalidateWellCache = true;
 			private static DateTime NoUpdateBefore = DateTime.MinValue;
-			private static DateTime NextWellCheck = DateTime.MinValue;
 
-			private static List<Vector3> wellLocations;
+			public static WellCache Wells { get; } = new();
 
 			public static void Prefix(FeedableInventorySystem_Update __instance)
 			{
@@ -116,44 +118,13 @@ namespace LeadAHorseToWater
 
 					var horseEntityQuery = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
 
+
 					if (horseEntityQuery.Length == 0)
 					{
 						return;
 					}
 
-					// Find Wells
-					if (InvalidateWellCache || DateTime.Now > NextWellCheck)
-					{
-						NextWellCheck = DateTime.Now.AddSeconds(90);
-
-						var wellQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
-						{
-							All = new ComponentType[] {
-							ComponentType.ReadOnly<Team>(),
-							ComponentType.ReadOnly<CastleHeartConnection>(),
-							ComponentType.ReadOnly<BlueprintData>(),
-							ComponentType.ReadOnly<LocalToWorld>()
-						},
-							Options = EntityQueryOptions.IncludeDisabled
-						});
-
-						var wellEntities = wellQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-						var count = 0;
-						wellLocations = new List<Vector3>();
-						foreach (var well in wellEntities)
-						{
-							count++;
-							var blueprintData = VWorld.Server.EntityManager.GetComponentData<BlueprintData>(well);
-							var location = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(well);
-							if (blueprintData.Guid.GuidHash == 986517450)
-							{
-								logger?.LogDebug($"Well Found: [{count}]: Blueprint GUID={blueprintData.Guid}, Location={location.Position}");
-								wellLocations.Add(FromFloat3(location.Position));
-							}
-						}
-
-						InvalidateWellCache = false;
-					}
+					Wells.Update();
 
 					foreach (var horseEntity in horseEntityQuery)
 					{
@@ -164,7 +135,7 @@ namespace LeadAHorseToWater
 
 						logger?.LogDebug($"Horse <{horseEntity.Index}> Found at {horsePosition}:");
 						bool closeEnough = false;
-						foreach (var wellPosition in wellLocations)
+						foreach (var wellPosition in Wells.Positions)
 						{
 							var distance = Vector3.Distance(wellPosition, horsePosition);
 							logger?.LogDebug($"\t\tWell={wellPosition} Distance={distance}");
