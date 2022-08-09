@@ -1,6 +1,6 @@
 {
     "name": "LeadAHorseToWater",
-    "version_number": "0.4.0",
+    "version_number": "0.4.2",
     "website_url": "https://github.com/decaprime/LeadAHorseToWater",
     "description": "Lets your horses drink water from wells.",
     "dependencies": [
