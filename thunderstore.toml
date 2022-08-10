@@ -1,0 +1,28 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "deca"
+name = "LeadAHorseToWater"
+versionNumber = "0.4.2"
+description = "Lets your horses drink water from wells."
+websiteUrl = "https://github.com/decaprime/LeadAHorseToWater"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack_V_Rising = "1.0.0"
+molenzwiebel-Wetstone = "1.1.0"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./dist"
+target = ""
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["v-rising"]
+categories = []
