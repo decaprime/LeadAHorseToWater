@@ -7,6 +7,8 @@ using ProjectM;
 using ProjectM.CastleBuilding.Placement;
 using ProjectM.Network;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -28,6 +30,47 @@ namespace LeadAHorseToWater
 		private static ConfigEntry<string> DRINKING_PREFIX;
 		private static ConfigEntry<bool> ENABLE_RENAME;
 		private static ConfigEntry<bool> ENABLE_PREFIX_COLOR;
+		public static ConfigEntry<string> ENABLED_WELL_PREFAB;
+
+		public static HashSet<int> EnabledWellPrefabs = new();
+
+		private static Dictionary<string, int> _fountains = new(){
+				{"stone", 986517450},
+				{"iron", 1247163010},
+				{"broznze", -1790149989},
+				{"small", 549920910},
+				{"large", 177891172},
+		};
+		
+		private void ParseEnabledWells()
+		{
+			EnabledWellPrefabs.Clear();
+
+			var list = ENABLED_WELL_PREFAB.Value;
+
+			var values = list.Split(",", StringSplitOptions.RemoveEmptyEntries);
+			logger.LogMessage($"{list} is value {values} are values");
+			foreach (var value in values)
+			{
+				var key = value.Trim().ToLowerInvariant();
+
+				if (int.TryParse(key, out var guid))
+				{
+					EnabledWellPrefabs.Add(guid);
+					logger.LogMessage($"{guid} is acting well type");
+
+				}
+				else if (_fountains.TryGetValue(key, out var wellGuid))
+				{
+					EnabledWellPrefabs.Add(wellGuid);
+					logger.LogMessage($"{wellGuid} is {key} well type");
+				}
+				else
+				{
+					logger.LogWarning($"Unknown well prefab value: {key}");
+				}
+			}
+		}
 
 
 		private HarmonyLib.Harmony _harmony;
@@ -43,6 +86,10 @@ namespace LeadAHorseToWater
 			ENABLE_RENAME = Config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with the DrinkingPrefix");
 			ENABLE_PREFIX_COLOR = Config.Bind<bool>("Server", "EnablePrefixColor", true, "If true use a different color for the DrinkingPrefix");
 			DRINKING_PREFIX = Config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "Prefix to use on horses that are drinking");
+			ENABLED_WELL_PREFAB = Config.Bind<string>("Server", "EnabledWellPrefabs", "Stone, Large", "This is a comma seperated list of prefabs to use for the well. You can choose from one of (stone, iron, bronze, small, big) or (advanced: at your own risk) you can also include an arbitrary guid hash of of a castle connected placeable.");
+
+			ENABLED_WELL_PREFAB.SettingChanged += (_, _) => ParseEnabledWells();
+			ParseEnabledWells();
 
 			// Server plugin check
 			if (!VWorld.IsServer)

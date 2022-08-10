@@ -20,12 +20,13 @@ namespace LeadAHorseToWater
 			public IEnumerable<float3> Positions => Cache.Values.Select(x => x.Location);
 
 			private const int MAX_BATCH = 1000;
-				
+
 			private bool _initialized = false;
 
 			private Queue<Entity> _possibleWells = new();
-			
+
 			private bool _scanForAdded;
+
 
 			public void PlanScanForAdded() => _scanForAdded = true;
 
@@ -37,7 +38,7 @@ namespace LeadAHorseToWater
 
 				}
 			}
-			
+
 			public void InvalidateAll()
 			{
 				foreach (var key in Cache.Keys.ToList())
@@ -89,7 +90,8 @@ namespace LeadAHorseToWater
 					logger?.LogDebug($"Invalidated {invalidatedEntities.Count} entities in {sw.ElapsedMilliseconds}ms, ending update.");
 				}
 			}
-			public static bool IsWellPrefab(PrefabGUID guid) => guid.GuidHash == 986517450;
+			public static bool IsWellPrefab(PrefabGUID guid) => Plugin.EnabledWellPrefabs.Contains(guid.GuidHash);
+			
 
 			private void UpdateCache(Entity entity)
 			{
