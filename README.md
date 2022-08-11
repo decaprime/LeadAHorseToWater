@@ -42,6 +42,11 @@ EnablePrefixColor = true
 # Setting type: String
 # Default value: [Drinking] 
 DrinkingPrefix = [Drinking]
+
+## This is a comma seperated list of prefabs to use for the well. You can choose from one of (stone, iron, bronze, small, big) or (advanced: at your own risk) you can also include an arbitrary guid hash of of a castle connected placeable.
+# Setting type: String
+# Default value: Stone, Large
+EnabledWellPrefabs = Stone, Large
 ```
 
 ## Demo Video (only viewable on github)
