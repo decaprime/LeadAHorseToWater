@@ -16,7 +16,7 @@ on:
 jobs:
   release_on_thunderstore:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
+      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || "v0.5.9"}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,11 +38,9 @@ jobs:
         with:
           additionalArguments: '/overrideconfig "mode=Mainline"'
       - name: Download Release
-        run: gh release download ${{ github.event.release.tag_name }}
+        run: gh release download ${{ github.event.release.tag_name }} -D ./dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Move to ./dist
-        run: mv ./LeadAHorseToWater.dll ./dist
       - name: Run tcli
         run: tcli build --package-version $GitVersion_SemVer --output-path ./dist
       - name: Upload a Build Artifact
