@@ -1,28 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
-		<AssemblyName>LeadAHorseToWater</AssemblyName>
-		<Description>Lead a horse to a well to make it drink.</Description>
-		<Version>0.5.0</Version>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<UnhollowedDllPath>L:\SteamLibrary\steamapps\common\VRising\BepInEx\unhollowed</UnhollowedDllPath>
-	</PropertyGroup>
-
-	<!-- Copy LeadAHorseToWater.dll to /dist -->
-	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-		<Copy SourceFiles="$(OutDir)\LeadAHorseToWater.dll" DestinationFolder="$(SolutionDir)/dist" />
-	</Target>
-
-	<ItemGroup>
-		<PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-*" IncludeAssets="compile" />
-		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-		<PackageReference Include="VRising.Unhollowed.Client" Version="0.6.2" />
-		<PackageReference Include="Wetstone" Version="1.1.0" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>LeadAHorseToWater</AssemblyName>
+    <Description>Lead a horse to a well to make it drink.</Description>
+    <Version>0.5.11</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <AssemblyVersion>0.5.11.0</AssemblyVersion>
+    <FileVersion>0.5.11.0</FileVersion>
+    <InformationalVersion>0.5.11+4.Branch.main.Sha.143926a745aa398f53ca0d7133c2bb315ae4c64d</InformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <UnhollowedDllPath>L:\SteamLibrary\steamapps\common\VRising\BepInEx\unhollowed</UnhollowedDllPath>
+  </PropertyGroup>
+  <!-- Copy LeadAHorseToWater.dll to /dist -->
+  <Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
+    <Copy SourceFiles="$(OutDir)\LeadAHorseToWater.dll" DestinationFolder="$(SolutionDir)/dist" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-*" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+    <PackageReference Include="VRising.Unhollowed.Client" Version="0.5.*" />
+    <PackageReference Include="Wetstone" Version="1.1.0" />
+  </ItemGroup>
 </Project>
