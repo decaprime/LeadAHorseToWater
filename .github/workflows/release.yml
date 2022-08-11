@@ -9,6 +9,8 @@ on:
         required: true
         description: The tag to release.
         type: string
+    branches:
+      - gh_actions_dev
 
 jobs:
   release_on_thunderstore:
