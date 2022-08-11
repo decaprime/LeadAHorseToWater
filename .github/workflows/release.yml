@@ -9,6 +9,7 @@ on:
         required: true
         description: The tag to release.
         type: string
+  push:
     branches:
       - gh_actions_dev
 
