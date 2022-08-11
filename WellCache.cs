@@ -102,7 +102,7 @@ namespace LeadAHorseToWater
 				if (IsWellPrefab(blueprintData.Guid))
 				{
 					var location = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(entity);
-					_log?.LogMessage($"Well Found:  Blueprint GUID={blueprintData.Guid}, Location={location.Position}");
+					_log?.LogDebug($"Well Found:  Blueprint GUID={blueprintData.Guid}, Location={location.Position}");
 
 					var newValue = (false, location.Position);
 
