@@ -48,4 +48,4 @@ jobs:
           files: ./dist/LeadAHorseToWater.dll
           fail_on_unmatched_files: true
           prerelease: true
-          tag: ${{ env.GitVersion_FullSemVer }}
+          tag_name: ${{ env.GitVersion_FullSemVer }}
