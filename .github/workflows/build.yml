@@ -28,9 +28,6 @@ jobs:
         with:
           additionalArguments: '/overrideconfig "mode=Mainline"'
 
-      - name: Authenticate for GitHub Packages
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name deca-github "https://nuget.pkg.github.com/decaprime/index.json"
-
       - name: Build (Release)
         run: dotnet build . --configuration Release -p:Version=$GitVersion_SemVer
 
@@ -44,8 +41,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: Automatic pre-release of ${{ env.GitVersion_FullSemVer }} for ${{ env.GitVersion_ShortSha }}
-          name: ${{ env.GitVersion_FullSemVer }}
+          name: v${{ env.GitVersion_FullSemVer }}
           files: ./dist/LeadAHorseToWater.dll
           fail_on_unmatched_files: true
           prerelease: true
-          tag_name: ${{ env.GitVersion_FullSemVer }}
+          tag_name: v${{ env.GitVersion_FullSemVer }}
