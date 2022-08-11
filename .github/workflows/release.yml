@@ -22,8 +22,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Dump GitHub tag
-        run: echo "This is ${{ env.RELEASE_TAG }}"
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
@@ -43,8 +41,8 @@ jobs:
       - name: Install tcli
         run: dotnet tool install --global tcli
       - name: Run tcli
-        run: tcli build --package-version ${{ env.RELEASE_TAG }} --output-path ./dist
+        run: tcli build --package-version ${RELEASE_TAG:1}
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
-          path: ./dist
+          path: ./build
