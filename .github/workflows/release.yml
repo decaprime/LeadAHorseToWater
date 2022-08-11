@@ -16,7 +16,8 @@ on:
 jobs:
   release_on_thunderstore:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || "v0.5.9"}}
+      DEFAULT_TAG: v0.5.9
+      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || env.DEFAULT_TAG }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
