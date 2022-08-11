@@ -9,13 +9,11 @@ on:
         required: true
         description: The tag to release.
         type: string
-  push:
-    branches:
-      - gh_actions_dev
+        
 jobs:
   release_on_thunderstore:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || 'v0.4.2' }}
+      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

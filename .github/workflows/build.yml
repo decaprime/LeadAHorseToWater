@@ -13,11 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.7
         with:
@@ -33,12 +41,12 @@ jobs:
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
-        if: github.event_name == 'push'
         with:
           path: ./dist
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
+        if: github.event_name == 'push'
         with:
           body: Automatic pre-release of ${{ env.GitVersion_FullSemVer }} for ${{ env.GitVersion_ShortSha }}
           name: v${{ env.GitVersion_FullSemVer }}
