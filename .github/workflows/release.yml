@@ -12,13 +12,10 @@ on:
   push:
     branches:
       - gh_actions_dev
-env:
-  DEFAULT_TAG: v0.5.9
-
 jobs:
   release_on_thunderstore:
     env:
-      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || env.DEFAULT_TAG }}
+      RELEASE_TAG: ${{ github.event.inputs.tag_name || github.event.release.tag_name || 'v0.5.9' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
