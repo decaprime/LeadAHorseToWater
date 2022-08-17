@@ -10,9 +10,6 @@
     <FileVersion>0.5.11.0</FileVersion>
     <InformationalVersion>0.5.11+4.Branch.main.Sha.143926a745aa398f53ca0d7133c2bb315ae4c64d</InformationalVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <UnhollowedDllPath>L:\SteamLibrary\steamapps\common\VRising\BepInEx\unhollowed</UnhollowedDllPath>
-  </PropertyGroup>
   <!-- Copy LeadAHorseToWater.dll to /dist -->
   <Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
     <Copy SourceFiles="$(OutDir)\LeadAHorseToWater.dll" DestinationFolder="$(SolutionDir)/dist" />
