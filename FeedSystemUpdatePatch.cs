@@ -24,7 +24,7 @@ namespace LeadAHorseToWater
 		{
 			try
 			{
-				if (NoUpdateBefore > DateTime.Now)  
+				if (NoUpdateBefore > DateTime.Now)
 				{
 					return;
 				}

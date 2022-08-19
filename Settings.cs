@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace LeadAHorseToWater
 {
-    // because Config was taken
-    public static class Settings
-    {
+	// because Config was taken
+	public static class Settings
+	{
 		private static ManualLogSource log => Plugin.LogInstance;
-		
+
 		public static ConfigEntry<float> DISTANCE_REQUIRED;
 		public static ConfigEntry<int> SECONDS_DRINK_PER_TICK;
 		public static ConfigEntry<int> MAX_DRINK_AMOUNT;
@@ -52,10 +52,10 @@ namespace LeadAHorseToWater
 		private static void ParseEnabledWells()
 		{
 			EnabledWellPrefabs.Clear();
-			
+
 			var list = ENABLED_WELL_PREFAB.Value;
 			var values = list.Split(",", StringSplitOptions.RemoveEmptyEntries);
-			
+
 			log.LogDebug($"Parsing {list} is value {values} are values");
 			foreach (var value in values)
 			{

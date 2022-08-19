@@ -9,7 +9,7 @@ namespace LeadAHorseToWater
 	public static class PlaceTileModelSystem_Patches
 	{
 		private static ManualLogSource _log => Plugin.LogInstance;
-		
+
 		[HarmonyPostfix]
 		[HarmonyPatch(nameof(PlaceTileModelSystem.ClearEditing))]
 		public static void Moving(PlaceTileModelSystem __instance, EntityManager entityManager, Entity tileModelEntity, Entity character)

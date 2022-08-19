@@ -16,7 +16,7 @@ namespace LeadAHorseToWater
 	public class WellCache
 	{
 		private static ManualLogSource _log => Plugin.LogInstance;
-		
+
 		public Dictionary<Entity, (bool IsInvalidated, float3 Location)> Cache { get; } = new();
 		public IEnumerable<float3> Positions => Cache.Values.Select(x => x.Location);
 
@@ -91,7 +91,6 @@ namespace LeadAHorseToWater
 			}
 		}
 		public static bool IsWellPrefab(PrefabGUID guid) => Settings.EnabledWellPrefabs.Contains(guid.GuidHash);
-
 
 		private void UpdateCache(Entity entity)
 		{

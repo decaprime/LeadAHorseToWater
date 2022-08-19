@@ -28,7 +28,7 @@ namespace LeadAHorseToWater.VCFCompat
 		public static void Register() => CommandRegistry.RegisterCommandType(typeof(HorseCommands));
 
 		private static System.Random _random = new();
-		
+
 		public class HorseCommands
 		{
 			private static PrefabGUID BreedItemType = new PrefabGUID(-570287766);

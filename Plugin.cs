@@ -19,7 +19,7 @@ namespace LeadAHorseToWater
 		{
 			LogInstance = this.Log;
 			Settings.Initialize(Config);
-			
+
 			// Server plugin check
 			if (!VWorld.IsServer)
 			{
