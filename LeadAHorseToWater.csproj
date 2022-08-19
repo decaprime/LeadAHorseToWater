@@ -20,4 +20,9 @@
     <PackageReference Include="VRising.Unhollowed.Client" Version="0.5.*" />
     <PackageReference Include="Wetstone" Version="1.1.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="VampireCommandFramework">
+      <HintPath>..\VampireCommandFramework\VCF.Core\bin\Debug\netstandard2.1\VampireCommandFramework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

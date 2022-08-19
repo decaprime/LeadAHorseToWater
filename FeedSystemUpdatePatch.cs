@@ -24,29 +24,30 @@ namespace LeadAHorseToWater
 		{
 			try
 			{
-				if (NoUpdateBefore > DateTime.Now)
+				if (NoUpdateBefore > DateTime.Now)  
 				{
 					return;
 				}
 
 				NoUpdateBefore = DateTime.Now.AddSeconds(1.5);
 
-				var horseEntityQuery = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+				var horses = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
 
-
-				if (horseEntityQuery.Length == 0)
+				if (horses.Length == 0)
 				{
 					return;
 				}
 
 				Wells.Update();
 
-				foreach (var horseEntity in horseEntityQuery)
+				BreedHorseProcess.Update(horses);
+
+				foreach (var horseEntity in horses)
 				{
 					if (!IsHorseWeFeed(horseEntity, __instance)) continue;
 
 					var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horseEntity);
-					var horsePosition = FromFloat3(localToWorld.Position);
+					var horsePosition = localToWorld.Position;
 
 					_log?.LogDebug($"Horse <{horseEntity.Index}> Found at {horsePosition}:");
 					bool closeEnough = false;
@@ -116,7 +117,5 @@ namespace LeadAHorseToWater
 			// Wild horses are Units, appear to no longer be units after you ride them.
 			return !isUnit;
 		}
-
-		private static Vector3 FromFloat3(float3 vec) => new Vector3(vec.x, vec.y, vec.z);
 	}
 }
