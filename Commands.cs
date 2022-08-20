@@ -3,17 +3,18 @@ using BepInEx.Logging;
 
 namespace LeadAHorseToWater.VCFCompat
 {
-	using ProjectM;
-	using Unity.Entities;
-	using Unity.Transforms;
-	using VampireCommandFramework;
-	using Wetstone.API;
-	using Unity.Collections;
-	using Unity.Mathematics;
-	using System.Collections.Generic;
-	using System;
+    using ProjectM;
+    using Unity.Entities;
+    using Unity.Transforms;
+    using VampireCommandFramework;
+    using Wetstone.API;
+    using Unity.Collections;
+    using Unity.Mathematics;
+    using System.Collections.Generic;
+    using System;
+    using LeadAHorseToWater.Processes;
 
-	public static class Commands
+    public static class Commands
 	{
 		private static ManualLogSource _log => Plugin.LogInstance;
 
