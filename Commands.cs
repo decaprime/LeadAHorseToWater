@@ -3,18 +3,17 @@ using BepInEx.Logging;
 
 namespace LeadAHorseToWater.VCFCompat
 {
-    using ProjectM;
-    using Unity.Entities;
-    using Unity.Transforms;
-    using VampireCommandFramework;
-    using Wetstone.API;
-    using Unity.Collections;
-    using Unity.Mathematics;
-    using System.Collections.Generic;
-    using System;
-    using LeadAHorseToWater.Processes;
+	using ProjectM;
+	using Unity.Entities;
+	using Unity.Transforms;
+	using VampireCommandFramework;
+	using Wetstone.API;
+	using Unity.Mathematics;
+	using System;
+	using LeadAHorseToWater.Processes;
+	using ProjectM.Network;
 
-    public static class Commands
+	public static partial class Commands
 	{
 		private static ManualLogSource _log => Plugin.LogInstance;
 
@@ -30,18 +29,29 @@ namespace LeadAHorseToWater.VCFCompat
 
 		private static System.Random _random = new();
 
+		[ChatCommandGroup("horse")]
 		public class HorseCommands
 		{
 			private static PrefabGUID BreedItemType = new PrefabGUID(-570287766);
+			private Entity? _closestHorse;
 
-			[ChatCommand("breed")]
-			public void Breed(CommandContext ctx)
+			public HorseCommands(ChatCommandContext ctx)
+			{
+				_closestHorse = HorseUtil.GetClosetHorse(ctx.Event.SenderCharacterEntity);
+				if (_closestHorse == null)
+				{
+					throw ctx.Error($"Could not find a horse.");
+				}
+			}
+
+			[ChatCommand("breed", adminOnly: false)]
+			public void Breed(ChatCommandContext ctx)
 			{
 				var character = ctx.Event.SenderCharacterEntity;
 
 				if (BreedHorseProcess.NextBabyData != null)
 				{
-					throw ctx.Error("Already breeding horse...wait a sec..");
+					throw ctx.Error("There's already a pair breeding, try again in a few seconds.");
 				}
 
 				if (!InventoryUtilities.TryGetInventoryEntity(VWorld.Server.EntityManager, character, out Entity invEntity))
@@ -49,7 +59,7 @@ namespace LeadAHorseToWater.VCFCompat
 					return;
 				}
 
-				var horses = ClosestHorses(character);
+				var horses = HorseUtil.ClosestHorses(character);
 				if (horses.Count != 2)
 				{
 					throw ctx.Error($"Must have only two nearby horses, found {horses.Count}");
@@ -59,7 +69,7 @@ namespace LeadAHorseToWater.VCFCompat
 				_log?.LogWarning($"Tried to remove 1, removed={didRemove}");
 				if (!didRemove)
 				{
-					throw ctx.Error("No fish given, no fuck given");
+					throw ctx.Error("You must have at least one special fish in your inventory.");
 				};
 
 				var pos1 = VWorld.Server.EntityManager.GetComponentData<Translation>(horses[0]).Value;
@@ -68,70 +78,85 @@ namespace LeadAHorseToWater.VCFCompat
 				var babyPos = UnityEngine.Vector3.Lerp(pos1, pos2, 0.5f);
 
 				var mountData1 = VWorld.Server.EntityManager.GetComponentData<Mountable>(horses[0]);
-				ctx.Reply($"Parent {horses[0].Index}\n Speed: {mountData1.MaxSpeed}\n Acceleration: {mountData1.Acceleration}\n Rotation: {mountData1.RotationSpeed}");
+				_log.LogInfo($"Parent {horses[0].Index}\n Speed: {mountData1.MaxSpeed}\n Acceleration: {mountData1.Acceleration}\n Rotation: {mountData1.RotationSpeed}");
 				var mountData2 = VWorld.Server.EntityManager.GetComponentData<Mountable>(horses[1]);
-				ctx.Reply($"Parent {horses[1].Index}\n Speed: {mountData2.MaxSpeed}\n Acceleration: {mountData2.Acceleration}\n Rotation: {mountData2.RotationSpeed}");
+				_log.LogInfo($"Parent {horses[1].Index}\n Speed: {mountData2.MaxSpeed}\n Acceleration: {mountData2.Acceleration}\n Rotation: {mountData2.RotationSpeed}");
 
 				var babySpeed = _random.NextDouble() > 0.5 ? mountData1.MaxSpeed : mountData2.MaxSpeed;
 				var babyAcceleration = _random.NextDouble() > 0.5 ? mountData1.Acceleration : mountData2.Acceleration;
 				var babyRotation = _random.NextDouble() > 0.5 ? mountData1.RotationSpeed : mountData2.RotationSpeed;
 
-
 				// todo: check we can breed in that these are ours
 				var team = VWorld.Server.EntityManager.GetComponentData<Team>(horses[0]);
 
-				SpawnHorse(1, babyPos);
+				HorseUtil.SpawnHorse(1, babyPos);
 				ctx.Reply($"Spawned Baby\n Speed {babySpeed}\n Acceleration: {babyAcceleration}\n Rotation: {babyRotation}");
 
 				BreedHorseProcess.NextBabyData = new BabyHorseData("Baby Horse", team, babyPos, babySpeed, babyAcceleration, babyRotation, horses[0].Index, horses[1].Index, DateTime.Now.AddSeconds(1.5));
 			}
-		}
 
-		private static List<Entity> ClosestHorses(Entity e, float radius = 5f)
-		{
-			var horses = GetHorses();
-			var results = new List<Entity>();
-			var origin = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(e).Position;
-
-			foreach (var horse in horses)
+			[ChatCommand("speed", adminOnly: true)]
+			public void SetSpeed(ICommandContext ctx, float speed)
 			{
-				var position = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horse).Position;
-				var distance = UnityEngine.Vector3.Distance(origin, position); // wait really?
-				if (distance < radius)
-
-				{
-					results.Add(horse);
-				}
+				_closestHorse?.WithComponentData((ref Mountable mount) => mount.MaxSpeed = speed);
+				ctx.Reply($"Horse speed set to {speed}");
 			}
 
-			return results;
-		}
-
-		private static NativeArray<Entity> GetHorses()
-		{
-			var horseQuery = VWorld.Server.EntityManager.CreateEntityQuery(
-				ComponentType.ReadWrite<FeedableInventory>(),
-				ComponentType.ReadWrite<NameableInteractable>(),
-				ComponentType.ReadWrite<Mountable>(),
-				ComponentType.ReadOnly<LocalToWorld>(),
-				ComponentType.ReadOnly<Team>()
-			);
-
-			return horseQuery.ToEntityArray(Allocator.Temp);
-
-		}
-		private static Entity empty_entity = new Entity();
-
-		private static void SpawnHorse(int countlocal, float3 localPos)
-		{
-			// TODO: Cache and Improve
-			var prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
-			var entityName = "CHAR_Town_Horse";
-			foreach (var kv in prefabCollectionSystem._PrefabGuidToNameMap)
+			[ChatCommand("acceleration", adminOnly: true)]
+			public void SetAcceleration(ICommandContext ctx, float acceleration)
 			{
-				if (kv.Value.ToString().ToLower() != entityName.ToLower()) continue;
-				VWorld.Server.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(empty_entity, kv.Key, new float3(localPos.x, 0, localPos.z), countlocal, 1, 2, -1);
-				break;
+				_closestHorse?.WithComponentData((ref Mountable mount) => mount.Acceleration = acceleration);
+				ctx.Reply($"Horse acceleration set to {acceleration}");
+			}
+
+			[ChatCommand("rotation", adminOnly: true)]
+			public void SetRotation(ICommandContext ctx, float rotation)
+			{
+				_closestHorse?.WithComponentData((ref Mountable mount) => mount.RotationSpeed = rotation);
+				ctx.Reply($"Horse rotation set to {rotation}");
+			}
+
+			[ChatCommand("warphorse", adminOnly: true)]
+			public void WarpHorse(ChatCommandContext ctx)
+			{
+				var position = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(_closestHorse.Value).Position;
+
+				var entity = VWorld.Server.EntityManager.CreateEntity(
+					ComponentType.ReadWrite<FromCharacter>(),
+					ComponentType.ReadWrite<PlayerTeleportDebugEvent>()
+				);
+
+				VWorld.Server.EntityManager.SetComponentData<FromCharacter>(entity, new()
+				{
+					User = ctx.Event.SenderUserEntity,
+					Character = ctx.Event.SenderCharacterEntity
+				});
+
+				VWorld.Server.EntityManager.SetComponentData<PlayerTeleportDebugEvent>(entity, new()
+				{
+					Position = position.xz,
+					Target = PlayerTeleportDebugEvent.TeleportTarget.Self,
+				});
+
+				ctx.Reply("Warped to closest horse.");
+			}
+
+			[ChatCommand("spawn", adminOnly: true)]
+			public void HorseMe(ChatCommandContext ctx, int num = 1)
+			{
+				float3 localPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
+				HorseUtil.SpawnHorse(num, localPos);
+				ctx.Reply($"Spawned {num} horse{(num > 1 ? "s" : "")} near you.");
+			}
+
+			[ChatCommand("whistle", adminOnly: true)]
+			public void Whistle(ChatCommandContext ctx)
+			{
+				float3 userPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
+				float3 horsePos = VWorld.Server.EntityManager.GetComponentData<Translation>(_closestHorse.Value).Value;
+
+				_closestHorse?.WithComponentData((ref Translation t) => { t.Value = userPos; });
+				ctx.Reply("Closest horse moved to you.");
 			}
 		}
 	}

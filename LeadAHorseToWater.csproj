@@ -18,11 +18,7 @@
     <PackageReference Include="BepInEx.IL2CPP" Version="6.0.0-*" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
     <PackageReference Include="VRising.Unhollowed.Client" Version="0.5.*" />
+    <PackageReference Include="VRising.VampireCommandFramework" Version="0.2.7" />
     <PackageReference Include="Wetstone" Version="1.1.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="VampireCommandFramework">
-      <HintPath>..\VampireCommandFramework\VCF.Core\bin\Debug\netstandard2.1\VampireCommandFramework.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
