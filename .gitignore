@@ -459,3 +459,8 @@ $RECYCLE.BIN/
 build/
 dist/
 *.zip
+
+# Local Devleopment
+*.secrets
+.vscode/
+*.bat
