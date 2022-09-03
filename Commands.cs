@@ -29,7 +29,7 @@ namespace LeadAHorseToWater.VCFCompat
 
 		private static System.Random _random = new();
 
-		[ChatCommandGroup("horse")]
+		[CommandGroup("horse")]
 		public class HorseCommands
 		{
 			private static PrefabGUID BreedItemType = new PrefabGUID(-570287766);
@@ -44,7 +44,7 @@ namespace LeadAHorseToWater.VCFCompat
 				}
 			}
 
-			[ChatCommand("breed", adminOnly: false)]
+			[Command("breed", adminOnly: false)]
 			public void Breed(ChatCommandContext ctx)
 			{
 				var character = ctx.Event.SenderCharacterEntity;
@@ -95,28 +95,28 @@ namespace LeadAHorseToWater.VCFCompat
 				BreedHorseProcess.NextBabyData = new BabyHorseData("Baby Horse", team, babyPos, babySpeed, babyAcceleration, babyRotation, horses[0].Index, horses[1].Index, DateTime.Now.AddSeconds(1.5));
 			}
 
-			[ChatCommand("speed", adminOnly: true)]
+			[Command("speed", adminOnly: true)]
 			public void SetSpeed(ICommandContext ctx, float speed)
 			{
 				_closestHorse?.WithComponentData((ref Mountable mount) => mount.MaxSpeed = speed);
 				ctx.Reply($"Horse speed set to {speed}");
 			}
 
-			[ChatCommand("acceleration", adminOnly: true)]
+			[Command("acceleration", adminOnly: true)]
 			public void SetAcceleration(ICommandContext ctx, float acceleration)
 			{
 				_closestHorse?.WithComponentData((ref Mountable mount) => mount.Acceleration = acceleration);
 				ctx.Reply($"Horse acceleration set to {acceleration}");
 			}
 
-			[ChatCommand("rotation", adminOnly: true)]
+			[Command("rotation", adminOnly: true)]
 			public void SetRotation(ICommandContext ctx, float rotation)
 			{
 				_closestHorse?.WithComponentData((ref Mountable mount) => mount.RotationSpeed = rotation);
 				ctx.Reply($"Horse rotation set to {rotation}");
 			}
 
-			[ChatCommand("warphorse", adminOnly: true)]
+			[Command("warphorse", adminOnly: true)]
 			public void WarpHorse(ChatCommandContext ctx)
 			{
 				var position = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(_closestHorse.Value).Position;
@@ -141,7 +141,7 @@ namespace LeadAHorseToWater.VCFCompat
 				ctx.Reply("Warped to closest horse.");
 			}
 
-			[ChatCommand("spawn", adminOnly: true)]
+			[Command("spawn", adminOnly: true)]
 			public void HorseMe(ChatCommandContext ctx, int num = 1)
 			{
 				float3 localPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
@@ -149,7 +149,7 @@ namespace LeadAHorseToWater.VCFCompat
 				ctx.Reply($"Spawned {num} horse{(num > 1 ? "s" : "")} near you.");
 			}
 
-			[ChatCommand("whistle", adminOnly: true)]
+			[Command("whistle", adminOnly: true)]
 			public void Whistle(ChatCommandContext ctx)
 			{
 				float3 userPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
