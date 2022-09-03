@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
-using Unity.DebugDisplay;
 using Wetstone.API;
 
 namespace LeadAHorseToWater

@@ -113,7 +113,7 @@ namespace LeadAHorseToWater.Patches
             var tc = TeamChecker.CreateWithoutCache(instance);
             var horseTeam = tc.GetTeam(horse);
             var isUnit = tc.IsUnit(horseTeam);
-            _log?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
+            // _log?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
 
             // Wild horses are Units, appear to no longer be units after you ride them.
             return !isUnit;
