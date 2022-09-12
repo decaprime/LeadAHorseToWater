@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace LeadAHorseToWater
 {
-    // because Config was taken
-    public static class Settings
-    {
+	// because Config was taken
+	public static class Settings
+	{
 		private static ManualLogSource log => Plugin.LogInstance;
-		
+
 		public static ConfigEntry<float> DISTANCE_REQUIRED;
 		public static ConfigEntry<int> SECONDS_DRINK_PER_TICK;
 		public static ConfigEntry<int> MAX_DRINK_AMOUNT;
@@ -23,6 +23,13 @@ namespace LeadAHorseToWater
 		public static ConfigEntry<bool> ENABLE_RENAME;
 		public static ConfigEntry<bool> ENABLE_PREFIX_COLOR;
 		public static ConfigEntry<string> ENABLED_WELL_PREFAB;
+
+		public static ConfigEntry<int> HORSE_BREED_PREFAB { get; private set; }
+		public static ConfigEntry<int> HORSE_BREED_COST { get; private set; }
+		public static ConfigEntry<float> HORSE_BREED_MUTATION_RANGE { get; private set; }
+		public static ConfigEntry<float> HORSE_BREED_MAX_SPEED { get; private set; }
+		public static ConfigEntry<float> HORSE_BREED_MAX_ROTATION { get; private set; }
+		public static ConfigEntry<float> HORSE_BREED_MAX_ACCELERATION { get; private set; }
 
 		public static HashSet<int> EnabledWellPrefabs = new();
 
@@ -37,6 +44,15 @@ namespace LeadAHorseToWater
 			DRINKING_PREFIX = config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "Prefix to use on horses that are drinking");
 			ENABLED_WELL_PREFAB = config.Bind<string>("Server", "EnabledWellPrefabs", "Stone, Large", "This is a comma seperated list of prefabs to use for the well. You can choose from one of (stone, iron, bronze, small, big) or (advanced: at your own risk) you can also include an arbitrary guid hash of of a castle connected placeable.");
 
+			HORSE_BREED_PREFAB = config.Bind<int>("Breeding", "BreedingRequiredItem", -570287766, "This prefab is consumed as a cost to breed horses.");
+			HORSE_BREED_COST = config.Bind<int>("Breeding", "BreedingCostAmount", 1, "This is the amount of the required item consumed.");
+
+			HORSE_BREED_MUTATION_RANGE = config.Bind<float>("Breeding", "MutationRange", 0.05f, "This is the half range +/- this value for applied for mutation.");
+
+			HORSE_BREED_MAX_SPEED = config.Bind<float>("Breeding", "MaxSpeed", 14f, "The absolute maximum speed for horses including selective breeding and mutations.");
+			HORSE_BREED_MAX_ROTATION = config.Bind<float>("Breeding", "MaxRotation", 16f, "The absolute maximum rotation for horses including selective breeding and mutations.");
+			HORSE_BREED_MAX_ACCELERATION = config.Bind<float>("Breeding", "MaxAcceleration", 9f, "The absolute maximum acceleration for horses including selective breeding and mutations.");
+
 			ENABLED_WELL_PREFAB.SettingChanged += (_, _) => ParseEnabledWells();
 			ParseEnabledWells();
 		}
@@ -44,7 +60,7 @@ namespace LeadAHorseToWater
 		private static Dictionary<string, int> _fountains = new(){
 				{"stone", 986517450},
 				{"iron", 1247163010},
-				{"broznze", -1790149989},
+				{"bronze", -1790149989},
 				{"small", 549920910},
 				{"large", 177891172},
 		};
@@ -52,10 +68,10 @@ namespace LeadAHorseToWater
 		private static void ParseEnabledWells()
 		{
 			EnabledWellPrefabs.Clear();
-			
+
 			var list = ENABLED_WELL_PREFAB.Value;
 			var values = list.Split(",", StringSplitOptions.RemoveEmptyEntries);
-			
+
 			log.LogDebug($"Parsing {list} is value {values} are values");
 			foreach (var value in values)
 			{
