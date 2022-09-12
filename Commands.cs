@@ -158,12 +158,12 @@ namespace LeadAHorseToWater.VCFCompat
 				}
 
 				[Command("rotation", adminOnly: true)]
-				public void SetRotation(ICommandContext ctx, float rotation) => SetAcceleration(ctx, _closestHorse, rotation);
+				public void SetRotation(ICommandContext ctx, float rotation) => SetRotation(ctx, _closestHorse, rotation);
 
 				[Command("rotation", adminOnly: true)]
 				public void SetRotation(ICommandContext ctx, Horse horse, float rotation)
 				{
-					horse.Entity.WithComponentData((ref Mountable mount) => mount.RotationSpeed = rotation);
+					horse.Entity.WithComponentData((ref Mountable mount) => mount.RotationSpeed = rotation * 10f);
 					ctx.Reply($"Horse rotation set to {rotation}");
 				}
 
@@ -190,7 +190,7 @@ namespace LeadAHorseToWater.VCFCompat
 						Target = PlayerTeleportDebugEvent.TeleportTarget.Self,
 					});
 
-					ctx.Reply("Warped to closest horse.");
+					ctx.Reply("Warped to horse.");
 				}
 
 				[Command("spawn", adminOnly: true)]
