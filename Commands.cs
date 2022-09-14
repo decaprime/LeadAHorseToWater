@@ -54,16 +54,15 @@ namespace LeadAHorseToWater.VCFCompat
 			public class HorseCommands
 			{
 				private static PrefabGUID BreedItemType = new PrefabGUID(-570287766);
-				private readonly Horse _closestHorse;
 
-				public HorseCommands(ChatCommandContext ctx)
+				private Horse GetRequiredClosestHorse(ChatCommandContext ctx)
 				{
 					var closest = HorseUtil.GetClosetHorse(ctx.Event.SenderCharacterEntity);
 					if (closest == null)
 					{
-						throw ctx.Error($"Could not find a horse.");
+						throw ctx.Error("No closest horse and expected to find one based on usage.");
 					}
-					_closestHorse = new Horse(closest.Value);
+					return new Horse(closest.Value);
 				}
 
 				[Command("breed", adminOnly: false)]
@@ -138,30 +137,30 @@ namespace LeadAHorseToWater.VCFCompat
 
 
 				[Command("speed", adminOnly: true)]
-				public void SetSpeed(ICommandContext ctx, float speed) => SetSpeed(ctx, _closestHorse, speed);
+				public void SetSpeed(ChatCommandContext ctx, float speed) => SetSpeed(ctx, GetRequiredClosestHorse(ctx), speed);
 
 				[Command("speed", adminOnly: true)]
-				public void SetSpeed(ICommandContext ctx, Horse horse, float speed)
+				public void SetSpeed(ChatCommandContext ctx, Horse horse, float speed)
 				{
 					horse.Entity.WithComponentData((ref Mountable mount) => mount.MaxSpeed = speed);
 					ctx.Reply($"Horse speed set to {speed}");
 				}
 
 				[Command("acceleration", adminOnly: true)]
-				public void SetAcceleration(ICommandContext ctx, float acceleration) => SetAcceleration(ctx, _closestHorse, acceleration);
+				public void SetAcceleration(ChatCommandContext ctx, float acceleration) => SetAcceleration(ctx, GetRequiredClosestHorse(ctx), acceleration);
 
 				[Command("acceleration", adminOnly: true)]
-				public void SetAcceleration(ICommandContext ctx, Horse horse, float acceleration)
+				public void SetAcceleration(ChatCommandContext ctx, Horse horse, float acceleration)
 				{
 					horse.Entity.WithComponentData((ref Mountable mount) => mount.Acceleration = acceleration);
 					ctx.Reply($"Horse acceleration set to {acceleration}");
 				}
 
 				[Command("rotation", adminOnly: true)]
-				public void SetRotation(ICommandContext ctx, float rotation) => SetRotation(ctx, _closestHorse, rotation);
+				public void SetRotation(ChatCommandContext ctx, float rotation) => SetRotation(ctx, GetRequiredClosestHorse(ctx), rotation);
 
 				[Command("rotation", adminOnly: true)]
-				public void SetRotation(ICommandContext ctx, Horse horse, float rotation)
+				public void SetRotation(ChatCommandContext ctx, Horse horse, float rotation)
 				{
 					horse.Entity.WithComponentData((ref Mountable mount) => mount.RotationSpeed = rotation * 10f);
 					ctx.Reply($"Horse rotation set to {rotation}");
@@ -170,7 +169,7 @@ namespace LeadAHorseToWater.VCFCompat
 				[Command("warp", adminOnly: true)]
 				public void WarpHorse(ChatCommandContext ctx, Horse horse = null)
 				{
-					horse ??= _closestHorse;
+					horse ??= GetRequiredClosestHorse(ctx);
 					var position = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horse.Entity).Position;
 
 					var entity = VWorld.Server.EntityManager.CreateEntity(
@@ -204,7 +203,7 @@ namespace LeadAHorseToWater.VCFCompat
 				[Command("whistle", adminOnly: true)]
 				public void Whistle(ChatCommandContext ctx, Horse horse = null)
 				{
-					horse ??= _closestHorse;
+					horse ??= GetRequiredClosestHorse(ctx);
 					float3 userPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
 					float3 horsePos = VWorld.Server.EntityManager.GetComponentData<Translation>(horse.Entity).Value;
 
@@ -213,7 +212,7 @@ namespace LeadAHorseToWater.VCFCompat
 				}
 
 				[Command("rename", adminOnly: true)]
-				public void Rename(ChatCommandContext ctx, string newName) => Rename(ctx, _closestHorse, newName);
+				public void Rename(ChatCommandContext ctx, string newName) => Rename(ctx, GetRequiredClosestHorse(ctx), newName);
 
 				[Command("rename", adminOnly: true)]
 				public void Rename(ChatCommandContext ctx, Horse horse, string newName)
@@ -225,6 +224,44 @@ namespace LeadAHorseToWater.VCFCompat
 						t.Name = newName;
 					});
 					ctx.Reply($"Closest horse {oldName} renamed {newName}.");
+				}
+
+				[Command("kill", adminOnly: true)]
+				public void Kill(ChatCommandContext ctx, Horse horse = null)
+				{
+					horse ??= GetRequiredClosestHorse(ctx);
+					horse.Entity.WithComponentData((ref Health t) =>
+					{
+						t.Value = 0;
+						t.TimeOfDeath = 0;
+						t.IsDead = true;
+					});
+					VWorld.Server.EntityManager.AddComponent(horse.Entity, ComponentType.ReadOnly<DestroyTag>());
+					ctx.Reply($"♥ I'm sure you were a good horse.");
+				}
+
+				[Command("cull", adminOnly: true)]
+				public void Kill(ChatCommandContext ctx, float radius = 5f, float percentage = 1f)
+				{
+
+					var horses = HorseUtil.ClosestHorses(ctx.Event.SenderCharacterEntity, radius);
+					var count = horses.Count;
+					var toRemove = Math.Clamp((int)(count * percentage), 0, count);
+					var remaining = toRemove;
+					foreach (var horse in horses)
+					{
+						if (remaining == 0) break;
+						horse.WithComponentData((ref Health t) =>
+						{
+							t.Value = 0;
+							t.TimeOfDeath = 0;
+							t.IsDead = true;
+						});
+						VWorld.Server.EntityManager.AddComponent(horse, ComponentType.ReadOnly<DestroyTag>());
+						remaining--;
+					}
+
+					ctx.Reply($"Removed {toRemove} horses.");
 				}
 			}
 		}

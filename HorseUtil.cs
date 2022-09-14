@@ -29,16 +29,18 @@
 
 			internal static NativeArray<Entity> GetHorses()
 			{
-				var horseQuery = VWorld.Server.EntityManager.CreateEntityQuery(
-					ComponentType.ReadWrite<FeedableInventory>(),
-					ComponentType.ReadWrite<NameableInteractable>(),
-					ComponentType.ReadWrite<Mountable>(),
-					ComponentType.ReadOnly<LocalToWorld>(),
-					ComponentType.ReadOnly<Team>()
-				);
+				var horseQuery = VWorld.Server.EntityManager.CreateEntityQuery(new EntityQueryDesc()
+				{
+					All = new[] { ComponentType.ReadWrite<FeedableInventory>(),
+						ComponentType.ReadWrite<NameableInteractable>(),
+						ComponentType.ReadWrite<Mountable>(),
+						ComponentType.ReadOnly<LocalToWorld>(),
+						ComponentType.ReadOnly<Team>()
+					},
+					None = new[] { ComponentType.ReadOnly<Dead>(), ComponentType.ReadOnly<DestroyTag>() }
+				});
 
 				return horseQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
-
 			}
 
 			internal static Entity? GetClosetHorse(Entity e)
