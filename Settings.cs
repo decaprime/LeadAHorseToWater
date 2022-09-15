@@ -35,15 +35,18 @@ namespace LeadAHorseToWater
 
 		internal static void Initialize(ConfigFile config)
 		{
+			
 			DISTANCE_REQUIRED = config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be within this distance from well. (5 =1 tile)");
 			SECONDS_DRINK_PER_TICK = config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 			MAX_DRINK_AMOUNT = config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");
 
-			ENABLE_RENAME = config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with the DrinkingPrefix");
-			ENABLE_PREFIX_COLOR = config.Bind<bool>("Server", "EnablePrefixColor", true, "If true use a different color for the DrinkingPrefix");
-			DRINKING_PREFIX = config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "Prefix to use on horses that are drinking");
+			ENABLE_RENAME = config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with a symbol");
+			ENABLE_PREFIX_COLOR = config.Bind<bool>("Server", "EnablePrefixColor", true, "[deprecated] If true use a different color for the DrinkingPrefix");
+			DRINKING_PREFIX = config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "[deprecated] Prefix to use on horses that are drinking");
 			ENABLED_WELL_PREFAB = config.Bind<string>("Server", "EnabledWellPrefabs", "Stone, Large", "This is a comma seperated list of prefabs to use for the well. You can choose from one of (stone, iron, bronze, small, big) or (advanced: at your own risk) you can also include an arbitrary guid hash of of a castle connected placeable.");
 
+
+			// Breeding
 			HORSE_BREED_PREFAB = config.Bind<int>("Breeding", "BreedingRequiredItem", -570287766, "This prefab is consumed as a cost to breed horses.");
 			HORSE_BREED_COST = config.Bind<int>("Breeding", "BreedingCostAmount", 1, "This is the amount of the required item consumed.");
 
@@ -80,13 +83,13 @@ namespace LeadAHorseToWater
 				if (int.TryParse(key, out var guid))
 				{
 					EnabledWellPrefabs.Add(guid);
-					log.LogInfo($"{guid} is acting well type");
+					log.LogDebug($"{guid} is acting well type");
 
 				}
 				else if (_fountains.TryGetValue(key, out var wellGuid))
 				{
 					EnabledWellPrefabs.Add(wellGuid);
-					log.LogInfo($"{wellGuid} is {key} well type");
+					log.LogDebug($"{wellGuid} is {key} well type");
 				}
 				else
 				{

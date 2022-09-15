@@ -131,11 +131,45 @@ namespace LeadAHorseToWater.VCFCompat
 
 					HorseUtil.SpawnHorse(1, babyPos);
 					ctx.Reply(sb.ToString());
-					var name = $"Baby Horse <color=#ef0>Ⓢ {babySpeed:F1} Ⓐ {babyAcceleration:F1} Ⓡ {(babyRotation):F1}";
+					var name = $"Baby Horse {StatTag(babySpeed, babyAcceleration, babyRotation)}";
 					BreedHorseProcess.NextBabyData = new BabyHorseData(name, team, babyPos, babySpeed, babyAcceleration, babyRotation * 10f, horses[0].Index, horses[1].Index, DateTime.Now.AddSeconds(1.5));
 				}
 
+				private string StatTag(float speed, float acceleration, float rotation) => $"<color={TagColor}>Ⓢ {speed:F1} Ⓐ {acceleration:F1} Ⓡ {(rotation):F1}";
+				private const string TagColor = "#BF5";
+				
+				[Command("tag-stats")]
+				public void TagStats(ChatCommandContext ctx, Horse horse = null)
+				{
+					horse ??= GetRequiredClosestHorse(ctx);
+					var nameComponent = VWorld.Server.EntityManager.GetComponentData<NameableInteractable>(horse.Entity);
+					var name = nameComponent.Name.ToString();
 
+					var statStart = name.LastIndexOf("Ⓢ");
+					if (statStart > 0)
+					{
+						var colorStart = name.LastIndexOf("<color=");
+						if (colorStart > 0 && colorStart < statStart)
+						{
+							name = name[..(colorStart - 1)];
+						}
+					}
+
+					if (name.Length >= 20)
+					{
+						ctx.Reply($"Name is too long, must be less than 20 characters, currently [without tag] {name.Length} characters");
+						return;
+					}
+
+					var mountData = VWorld.Server.EntityManager.GetComponentData<Mountable>(horse.Entity);
+					var tag = StatTag(mountData.MaxSpeed, mountData.Acceleration, mountData.RotationSpeed / 10f);
+
+					horse.Entity.WithComponentData<NameableInteractable>((ref NameableInteractable nameInteract) =>
+					{
+						nameInteract.Name = $"{name} {tag}";
+					});
+				}
+				
 				[Command("speed", adminOnly: true)]
 				public void SetSpeed(ChatCommandContext ctx, float speed) => SetSpeed(ctx, GetRequiredClosestHorse(ctx), speed);
 
@@ -237,7 +271,7 @@ namespace LeadAHorseToWater.VCFCompat
 						t.IsDead = true;
 					});
 					VWorld.Server.EntityManager.AddComponent(horse.Entity, ComponentType.ReadOnly<DestroyTag>());
-					ctx.Reply($"♥ I'm sure you were a good horse.");
+					ctx.Reply($"Horse removed.");
 				}
 
 				[Command("cull", adminOnly: true)]

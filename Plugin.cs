@@ -41,16 +41,15 @@ namespace LeadAHorseToWater
 			_harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 			Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
 
-			Log.LogWarning("Trying to find VCF:");
+			Log.LogInfo("Trying to find VCF:");
 			if (VCFCompat.Commands.Enabled)
 			{
 				VCFCompat.Commands.Register();
 			}
 			else
 			{
-				Log.LogError("YOU DONT HAVE VCF?! That's OKAY!!!");
+				Log.LogError("This mod has commands, you need to install VampireCommandFramework to use them, find whereever you get mods or : https://a.deca.gg/vcf .");
 			}
-
 		}
 
 		public override bool Unload()
