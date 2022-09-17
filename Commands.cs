@@ -13,6 +13,7 @@ namespace LeadAHorseToWater.VCFCompat
 	using LeadAHorseToWater.Processes;
 	using ProjectM.Network;
 	using System.Text;
+	using static UnityEngine.SpookyHash;
 
 	public static partial class Commands
 	{
@@ -102,23 +103,40 @@ namespace LeadAHorseToWater.VCFCompat
 					var babyPos = UnityEngine.Vector3.Lerp(pos1, pos2, 0.5f);
 
 					var mountData1 = VWorld.Server.EntityManager.GetComponentData<Mountable>(horses[0]);
-					_log.LogInfo($"Parent {horses[0].Index}\n Speed: {mountData1.MaxSpeed}\n Acceleration: {mountData1.Acceleration}\n Rotation: {mountData1.RotationSpeed}");
+					_log.LogDebug($"Parent {horses[0].Index}\n Speed: {mountData1.MaxSpeed}\n Acceleration: {mountData1.Acceleration}\n Rotation: {mountData1.RotationSpeed}");
 					var mountData2 = VWorld.Server.EntityManager.GetComponentData<Mountable>(horses[1]);
-					_log.LogInfo($"Parent {horses[1].Index}\n Speed: {mountData2.MaxSpeed}\n Acceleration: {mountData2.Acceleration}\n Rotation: {mountData2.RotationSpeed}");
+					_log.LogDebug($"Parent {horses[1].Index}\n Speed: {mountData2.MaxSpeed}\n Acceleration: {mountData2.Acceleration}\n Rotation: {mountData2.RotationSpeed}");
 
 					StringBuilder sb = new();
+					sb.AppendLine("Offspring Details");
 					var applyMutation = (string label, float parent1, float parent2, float maxValue) =>
 					{
 
-						var value = _random.NextDouble() > 0.5 ? parent1 : parent2;
-						sb.AppendLine($"Choosing from <{parent1:F1}, {parent2:f1}> = {value}");
+						float parentValue;
+						string par1 = parent1.ToString("F1"), par2 = parent2.ToString("F2");
+						string parentValueFormatted;
+						if (_random.NextDouble() > 0.5)
+						{
+							parentValue = parent1;
+							parentValueFormatted = $"( {par1.Underline()} | {par2.Color("#888")} )";
+						}
+						else
+						{
+							parentValue = parent2;
+							parentValueFormatted =$"( {par1.Color("#888")} | {par2.Underline()} )";
+						}
+
 						var adjustmentScale = maxValue * Settings.HORSE_BREED_MUTATION_RANGE.Value;
 						var mutation = (float)(_random.NextDouble() * 2.0 - 1.0);
 						var adjustment = mutation * adjustmentScale;
-						sb.AppendLine($"Mutation of {adjustment:F1} [{mutation:P}]");
-						var output = MathF.Min(value + adjustment, maxValue);
-						var atMax = output == maxValue;
-						sb.AppendLine($"{label} = {output:F1}{(atMax ? " [MAX]" : "")}");
+						char? sign = mutation > 0 ? '+' : null;
+
+						var mutationValues = $"{sign}{adjustment:F1}[{mutation:P}]".Color(adjustment > 0 ? "#1d1" : "#d11");
+						var output = MathF.Min(parentValue + adjustment, maxValue);
+						var atMax = output == maxValue ? " [MAX]".Color("#e0e") : "";
+						var outPutValueStr = $"{output:F1}{atMax}".Bold();
+						
+						sb.AppendLine($"{label.Bold().Color(Color.White)} {parentValueFormatted} {mutationValues} = {outPutValueStr}");
 						return output;
 					};
 
@@ -137,7 +155,7 @@ namespace LeadAHorseToWater.VCFCompat
 
 				private string StatTag(float speed, float acceleration, float rotation) => $"<color={TagColor}>Ⓢ {speed:F1} Ⓐ {acceleration:F1} Ⓡ {(rotation):F1}";
 				private const string TagColor = "#BF5";
-				
+
 				[Command("tag-stats")]
 				public void TagStats(ChatCommandContext ctx, Horse horse = null)
 				{
@@ -169,7 +187,7 @@ namespace LeadAHorseToWater.VCFCompat
 						nameInteract.Name = $"{name} {tag}";
 					});
 				}
-				
+
 				[Command("speed", adminOnly: true)]
 				public void SetSpeed(ChatCommandContext ctx, float speed) => SetSpeed(ctx, GetRequiredClosestHorse(ctx), speed);
 
@@ -180,10 +198,10 @@ namespace LeadAHorseToWater.VCFCompat
 					ctx.Reply($"Horse speed set to {speed}");
 				}
 
-				[Command("acceleration", adminOnly: true)]
+				[Command("acceleration", shortHand: "accel", adminOnly: true)]
 				public void SetAcceleration(ChatCommandContext ctx, float acceleration) => SetAcceleration(ctx, GetRequiredClosestHorse(ctx), acceleration);
 
-				[Command("acceleration", adminOnly: true)]
+				[Command("acceleration", shortHand: "accel", adminOnly: true)]
 				public void SetAcceleration(ChatCommandContext ctx, Horse horse, float acceleration)
 				{
 					horse.Entity.WithComponentData((ref Mountable mount) => mount.Acceleration = acceleration);
@@ -242,7 +260,7 @@ namespace LeadAHorseToWater.VCFCompat
 					float3 horsePos = VWorld.Server.EntityManager.GetComponentData<Translation>(horse.Entity).Value;
 
 					horse.Entity.WithComponentData((ref Translation t) => { t.Value = userPos; });
-					ctx.Reply("Closest horse moved to you.");
+					ctx.Reply("Horse moved to you.");
 				}
 
 				[Command("rename", adminOnly: true)]
@@ -257,7 +275,7 @@ namespace LeadAHorseToWater.VCFCompat
 						oldName = t.Name.ToString();
 						t.Name = newName;
 					});
-					ctx.Reply($"Closest horse {oldName} renamed {newName}.");
+					ctx.Reply($"Horse '{oldName}' renamed to '{newName}'.");
 				}
 
 				[Command("kill", adminOnly: true)]

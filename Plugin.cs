@@ -28,7 +28,6 @@ namespace LeadAHorseToWater
 				Log.LogWarning("This plugin is a server-only plugin.");
 				return;
 			}
-
 		}
 
 		public void OnGameInitialized()

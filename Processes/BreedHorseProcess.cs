@@ -4,7 +4,6 @@ using ProjectM.Network;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
-using Unity.DebugDisplay;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
