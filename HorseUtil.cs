@@ -1,26 +1,31 @@
-﻿namespace LeadAHorseToWater.VCFCompat
+﻿using System;
+using BepInEx.Logging;
+
+namespace LeadAHorseToWater.VCFCompat
 {
 	using ProjectM;
 	using Unity.Entities;
 	using Unity.Transforms;
-	using Wetstone.API;
+	using Bloodstone.API;
 	using Unity.Collections;
 	using Unity.Mathematics;
 	using System.Collections.Generic;
 
 	internal static class HorseUtil
 	{
+		private static ManualLogSource _log => Plugin.LogInstance;
 		private static Entity empty_entity = new Entity();
 
 		internal static void SpawnHorse(int countlocal, float3 localPos)
 		{
 			// TODO: Cache and Improve
 			var prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
-			var entityName = "CHAR_Town_Horse";
-			foreach (var kv in prefabCollectionSystem._PrefabGuidToNameMap)
+			var entityName = "char_mount_horse";
+			foreach (var kv in prefabCollectionSystem._SpawnableNameToPrefabGuidDictionary)
 			{
-				if (kv.Value.ToString().ToLower() != entityName.ToLower()) continue;
-				VWorld.Server.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(empty_entity, kv.Key, new float3(localPos.x, 0, localPos.z), countlocal, 1, 2, -1);
+				if (kv.Key.ToLower() != entityName.ToLower()) continue;
+				var usus = VWorld.Server.GetExistingSystem<UnitSpawnerUpdateSystem>();
+				usus.SpawnUnit(empty_entity, kv.Value, new float3(localPos.x, 0, localPos.z), countlocal, 1, 2, -1);
 				break;
 			}
 		}
@@ -38,7 +43,7 @@
 				None = new[] { ComponentType.ReadOnly<Dead>(), ComponentType.ReadOnly<DestroyTag>() }
 			});
 
-			return horseQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+			return horseQuery.ToEntityArray(Allocator.Temp);
 		}
 
 		internal static Entity? GetClosetHorse(Entity e)
@@ -61,6 +66,20 @@
 			}
 
 			return closestHorse;
+		}
+
+		internal static bool isTamed(Entity e)
+		{
+			EntityManager em = VWorld.Server.EntityManager;
+			ComponentDataFromEntity<Team> getTeam = VWorld.Server.EntityManager.GetComponentDataFromEntity<Team>();
+
+			if (!em.HasComponent<Team>(e)) return false;
+			var teamhorse = getTeam[e];
+			var isUnit = Team.IsInUnitTeam(teamhorse);
+                
+			// Wild horses are Units, appear to no longer be units after you ride them.
+			return !isUnit;
+
 		}
 
 		internal static List<Entity> ClosestHorses(Entity e, float radius = 5f)
