@@ -142,7 +142,7 @@ EnabledWellPrefabs = Stone, Large
 # Demo Video (only viewable on github) credit to deca
 https://user-images.githubusercontent.com/62450933/175365529-f6ade327-dbd0-4500-b840-128ac52cefe7.mp4
 
-<summary>Developer & credits</summary>
+# Developer & credits
 <details>
 
 ### [Discord](https://discord.gg/XY5bNtNm4w)
