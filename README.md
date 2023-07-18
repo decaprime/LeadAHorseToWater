@@ -1,4 +1,5 @@
-# 🐴 Lead A Horse To Water
+# 🐴 Lead A Horse To Water - Gloomrot Update
+forked from [decaprime](https://github.com/decaprime/LeadAHorseToWater) and updated to gloomrot.
 
 A V-Rising mod that lets your horses drink water from wells. Now with horse breeding and other commands.
 
@@ -18,11 +19,14 @@ For commands to load you must have [VampireCommandFramework](https://github.com/
 - Commands with `[horse=]` are optionally for specifying a horse by name and will default to the closest horse if not specified.
 - 🔒 Requires admin permissions
 - <ins>_Underlined_</ins> keys come from the config file.
-- Horses should be tamed and not riden by a player for most commands
 
 ### This info is also **available in game** with `.help LeadAHorseToWater`
 
 ---
+
+#### `.horse breedable [horse=]`
+
+This player command will check if the closest horse to you (or the horse with a matching name) is breedable.
 
 #### `.horse breed`
 
@@ -43,7 +47,7 @@ Powerful admin rename, this allows you do escape normal naming restrictions and 
 
 #### 🔒 `.horse whistle [horse=]` / `.horse warp [horse=]`
 
-Whistle trys to brings the horse to you, warp teleports you to the horse.
+Whistle tries to brings the horse to you, warp teleports you to the horse.
 
 #### 🔒 `.horse speed [horse=] (speed)`
 #### 🔒 `.horse acceleration [horse=] (acceleration)` 
@@ -66,6 +70,16 @@ Spawns either one or `count` horses around you.
 # Configurable Values
 ```ini
 [Breeding]
+
+## Enables the cooldown for breeding horses.
+# Setting type: Boolean
+# Default value: true
+EnableBreedingCooldown = true
+
+## This is the cooldown in seconds for breeding horses.
+# Setting type: Int32
+# Default value: 600
+BreedingCooldown = 600
 
 ## This prefab is consumed as a cost to breed horses.
 # Setting type: Int32
@@ -125,5 +139,17 @@ EnableRename = true
 EnabledWellPrefabs = Stone, Large
 ```
 
-# Demo Video (only viewable on github)
+# Demo Video (only viewable on github) credit to deca
 https://user-images.githubusercontent.com/62450933/175365529-f6ade327-dbd0-4500-b840-128ac52cefe7.mp4
+
+<summary>Developer & credits</summary>
+<details>
+
+### [Discord](https://discord.gg/XY5bNtNm4w)
+### Current Developer
+- `skythebro/skyKDG` - Also known as realsky on discord
+
+### Original Creator & Developer
+- `deca` - Also known as decaprime on discord
+
+</details>

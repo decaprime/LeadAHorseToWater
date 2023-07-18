@@ -1,8 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.IL2CPP;
+using BepInEx.Unity.IL2CPP;
 using BepInEx.Logging;
-using Il2CppDumper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +18,14 @@ namespace LeadAHorseToWater
 		public static ConfigEntry<float> DISTANCE_REQUIRED;
 		public static ConfigEntry<int> SECONDS_DRINK_PER_TICK;
 		public static ConfigEntry<int> MAX_DRINK_AMOUNT;
-		public static ConfigEntry<string> DRINKING_PREFIX;
+		public static String DRINKING_PREFIX = "[Drinking] ";
+		
 		public static ConfigEntry<bool> ENABLE_RENAME;
-		public static ConfigEntry<bool> ENABLE_PREFIX_COLOR;
+		public static bool ENABLE_PREFIX_COLOR = true;
 		public static ConfigEntry<string> ENABLED_WELL_PREFAB;
 
+		public static ConfigEntry<bool> ENABLE_HORSE_BREED_COOLDOWN { get; private set; }
+		public static ConfigEntry<int> HORSE_BREED_COOLDOWN { get; private set; }
 		public static ConfigEntry<int> HORSE_BREED_PREFAB { get; private set; }
 		public static ConfigEntry<int> HORSE_BREED_COST { get; private set; }
 		public static ConfigEntry<float> HORSE_BREED_MUTATION_RANGE { get; private set; }
@@ -33,20 +35,24 @@ namespace LeadAHorseToWater
 
 		public static HashSet<int> EnabledWellPrefabs = new();
 
+		
+
 		internal static void Initialize(ConfigFile config)
 		{
 			
-			DISTANCE_REQUIRED = config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be within this distance from well. (5 =1 tile)");
+			DISTANCE_REQUIRED = config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be withdin this distance from well. (5 =1 tile)");
 			SECONDS_DRINK_PER_TICK = config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 			MAX_DRINK_AMOUNT = config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");
 
 			ENABLE_RENAME = config.Bind<bool>("Server", "EnableRename", true, "If true will rename horses in drinking range with a symbol");
-			ENABLE_PREFIX_COLOR = config.Bind<bool>("Server", "EnablePrefixColor", true, "[deprecated] If true use a different color for the DrinkingPrefix");
-			DRINKING_PREFIX = config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "[deprecated] Prefix to use on horses that are drinking");
+			//ENABLE_PREFIX_COLOR = config.Bind<bool>("Server", "EnablePrefixColor", true, "[deprecated] If true use a different color for the DrinkingPrefix");
+			//DRINKING_PREFIX =  config.Bind<string>("Server", "DrinkingPrefix", "[Drinking] ", "[deprecated] Prefix to use on horses that are drinking");
 			ENABLED_WELL_PREFAB = config.Bind<string>("Server", "EnabledWellPrefabs", "Stone, Large", "This is a comma seperated list of prefabs to use for the well. You can choose from one of (stone, iron, bronze, small, big) or (advanced: at your own risk) you can also include an arbitrary guid hash of of a castle connected placeable.");
 
 
 			// Breeding
+			ENABLE_HORSE_BREED_COOLDOWN = config.Bind<bool>("Breeding", "EnableBreedingCooldown", true, "Enables the cooldown for breeding horses.");
+			HORSE_BREED_COOLDOWN = config.Bind<int>("Breeding", "BreedingCooldown", 600, "This is the cooldown in seconds for breeding horses.");
 			HORSE_BREED_PREFAB = config.Bind<int>("Breeding", "BreedingRequiredItem", -570287766, "This prefab is consumed as a cost to breed horses.");
 			HORSE_BREED_COST = config.Bind<int>("Breeding", "BreedingCostAmount", 1, "This is the amount of the required item consumed.");
 
