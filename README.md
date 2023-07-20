@@ -142,6 +142,9 @@ EnabledWellPrefabs = Stone, Large
 # Demo Video (only viewable on github) credit to deca
 https://user-images.githubusercontent.com/62450933/175365529-f6ade327-dbd0-4500-b840-128ac52cefe7.mp4
 
+# Support me!
+I have a patreon now so please support me [Here](patreon.com/user?u=97347013) so I can mod as much as I can!
+
 # Developer & credits
 <details>
 
