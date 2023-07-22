@@ -27,6 +27,7 @@ namespace LeadAHorseToWater
 		public static ConfigEntry<bool> ENABLE_HORSE_BREED_COOLDOWN { get; private set; }
 		public static ConfigEntry<int> HORSE_BREED_COOLDOWN { get; private set; }
 		public static ConfigEntry<int> HORSE_BREED_PREFAB { get; private set; }
+		public static ConfigEntry<string> HORSE_BREED_ITEM_NAME { get; private set; }
 		public static ConfigEntry<int> HORSE_BREED_COST { get; private set; }
 		public static ConfigEntry<float> HORSE_BREED_MUTATION_RANGE { get; private set; }
 		public static ConfigEntry<float> HORSE_BREED_MAX_SPEED { get; private set; }
@@ -54,6 +55,7 @@ namespace LeadAHorseToWater
 			ENABLE_HORSE_BREED_COOLDOWN = config.Bind<bool>("Breeding", "EnableBreedingCooldown", true, "Enables the cooldown for breeding horses.");
 			HORSE_BREED_COOLDOWN = config.Bind<int>("Breeding", "BreedingCooldown", 600, "This is the cooldown in seconds for breeding horses.");
 			HORSE_BREED_PREFAB = config.Bind<int>("Breeding", "BreedingRequiredItem", -570287766, "This prefab is consumed as a cost to breed horses.");
+			HORSE_BREED_ITEM_NAME = config.Bind<string>("Breeding", "BreedingCostItemName", "special fish", "This is the name of the required item that will be consumed.");
 			HORSE_BREED_COST = config.Bind<int>("Breeding", "BreedingCostAmount", 1, "This is the amount of the required item consumed.");
 
 			HORSE_BREED_MUTATION_RANGE = config.Bind<float>("Breeding", "MutationRange", 0.05f, "This is the half range +/- this value for applied for mutation.");

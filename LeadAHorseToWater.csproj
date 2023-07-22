@@ -22,4 +22,7 @@
     <PackageReference Include="VRising.Bloodstone" Version="0.1.4" />
     <PackageReference Include="VRising.VampireCommandFramework" Version="0.8.0" />
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command='copy "C:\Users\bryan\OneDrive - Karel de Grote Hogeschool\programmeren 2\.net\Projects\LeadAHorseToWater\bin\Debug\net6.0\LeadAHorseToWater.dll" "G:\SteamLibrary\steamapps\common\VRising\BepInEx\plugins"' />
+  </Target>
 </Project>

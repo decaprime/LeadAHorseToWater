@@ -163,11 +163,10 @@ namespace LeadAHorseToWater.VCFCompat
 
                     var didRemove = InventoryUtilitiesServer.TryRemoveItem(VWorld.Server.EntityManager, invEntity,
                         breedItem, breedAmount);
-                    _log?.LogWarning($"Tried to remove {breedAmount}, removed={didRemove}");
                     if (!didRemove)
                     {
                         BreedTimerProcess.Instance.StopCooldown();
-                        throw ctx.Error("You must have at least one special fish in your inventory.");
+                        throw ctx.Error($"You must have at least one {Settings.HORSE_BREED_ITEM_NAME.Value} in your inventory.");
                     }
 
                     var pos1 = VWorld.Server.EntityManager.GetComponentData<Translation>(horses[0]).Value;

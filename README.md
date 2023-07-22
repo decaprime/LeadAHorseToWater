@@ -86,6 +86,11 @@ BreedingCooldown = 600
 # Default value: -570287766
 BreedingRequiredItem = -570287766
 
+## This is the name of the required item that will be consumed.
+# Setting type: String
+# Default value: special fish
+BreedingCostItemName = special fish
+
 ## This is the amount of the required item consumed.
 # Setting type: Int32
 # Default value: 1
@@ -143,7 +148,7 @@ EnabledWellPrefabs = Stone, Large
 https://user-images.githubusercontent.com/62450933/175365529-f6ade327-dbd0-4500-b840-128ac52cefe7.mp4
 
 # Support me!
-I have a patreon now so please support me [Here](patreon.com/user?u=97347013) so I can mod as much as I can!
+I have a patreon now so please support me [Here](https://patreon.com/user?u=97347013) so I can mod as much as I can!
 
 # Developer & credits
 <details>
