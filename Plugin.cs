@@ -1,16 +1,15 @@
 ﻿using BepInEx;
-using BepInEx.IL2CPP;
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using System.Reflection;
-using Wetstone.API;
+using Bloodstone.API;
 
 namespace LeadAHorseToWater
 {
-	[BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
-	[BepInDependency("gg.deca.VampireCommandFramework", BepInDependency.DependencyFlags.SoftDependency)]
-	[BepInDependency("xyz.molenzwiebel.wetstone")]
-	[Wetstone.API.Reloadable]
+	[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+	[BepInDependency("gg.deca.Bloodstone")]
+	[Bloodstone.API.Reloadable]
 	public class Plugin : BasePlugin, IRunOnInitialized
 	{
 		private Harmony _harmony;
@@ -38,7 +37,7 @@ namespace LeadAHorseToWater
 			}
 			// Plugin startup logic
 			_harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
-			Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+			Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
 			Log.LogInfo("Trying to find VCF:");
 			if (VCFCompat.Commands.Enabled)
@@ -53,6 +52,11 @@ namespace LeadAHorseToWater
 
 		public override bool Unload()
 		{
+			if (VCFCompat.Commands.Enabled)
+			{
+				VCFCompat.Commands.Unregister();
+			}
+			
 			_harmony?.UnpatchSelf();
 			return true;
 		}

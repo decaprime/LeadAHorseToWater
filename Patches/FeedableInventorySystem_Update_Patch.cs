@@ -7,7 +7,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using Wetstone.API;
+using Bloodstone.API;
 
 namespace LeadAHorseToWater.Patches
 {
@@ -42,20 +42,21 @@ namespace LeadAHorseToWater.Patches
 
 				BreedHorseProcess.Update(horses);
 				CleanUpPrefixProcess.Update(horses);
-				
+
 				foreach (var horseEntity in horses)
 				{
+					// DumpHorseComponents(horseEntity);
 					if (!IsHorseWeFeed(horseEntity, __instance)) continue;
 
 					var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horseEntity);
 					var horsePosition = localToWorld.Position;
 
-					_log?.LogDebug($"Horse <{horseEntity.Index}> Found at {horsePosition}:");
+					// _log?.LogDebug($"Horse <{horseEntity.Index}> Found at {horsePosition}:");
 					bool closeEnough = false;
 					foreach (var wellPosition in Wells.Positions)
 					{
 						var distance = Vector3.Distance(wellPosition, horsePosition);
-						_log?.LogDebug($"\t\tWell={wellPosition} Distance={distance}");
+						// _log?.LogDebug($"\t\tWell={wellPosition} Distance={distance}");
 
 						if (distance < Settings.DISTANCE_REQUIRED.Value)
 						{
@@ -70,7 +71,7 @@ namespace LeadAHorseToWater.Patches
 
 					horseEntity.WithComponentData((ref FeedableInventory inventory) =>
 					{
-						_log?.LogDebug($"Feeding horse <{horseEntity.Index}> Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
+						// log?.LogDebug($"Feeding horse <{horseEntity.Index}> Found inventory: FeedTime={inventory.FeedTime} FeedProgressTime={inventory.FeedProgressTime} IsFed={inventory.IsFed} DamageTickTime={inventory.DamageTickTime} IsActive={inventory.IsActive}");
 						inventory.FeedProgressTime = Mathf.Min(inventory.FeedProgressTime + Settings.SECONDS_DRINK_PER_TICK.Value, Settings.MAX_DRINK_AMOUNT.Value);
 						inventory.IsFed = true; // don't drink canteens?
 					});
@@ -79,6 +80,20 @@ namespace LeadAHorseToWater.Patches
 			catch (Exception e)
 			{
 				_log?.LogError(e.ToString());
+			}
+		}
+
+
+		private static bool _calledOnce = false;
+		private static void DumpHorseComponents(Entity e)
+		{
+			if (_calledOnce) return;
+			_calledOnce = true;
+
+			_log?.LogWarning($"Horse <{e.Index}> Components:");
+			foreach (var component in VWorld.Server.EntityManager.GetComponentTypes(e))
+			{
+				_log?.LogWarning($"\t{component}");
 			}
 		}
 
@@ -109,13 +124,14 @@ namespace LeadAHorseToWater.Patches
 
 		private static bool IsHorseWeFeed(Entity horse, ComponentSystemBase instance)
 		{
-			var tc = TeamChecker.CreateWithoutCache(instance);
-			var horseTeam = tc.GetTeam(horse);
-			var isUnit = tc.IsUnit(horseTeam);
-			// _log?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
+			return true; // TODO: 
+						 //var tc = TeamChecker.CreateWithoutCache(instance);
+						 //var horseTeam = tc.GetTeam(horse);
+						 //var isUnit = tc.IsUnit(horseTeam);
+						 //// _log?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
 
-			// Wild horses are Units, appear to no longer be units after you ride them.
-			return !isUnit;
+			//// Wild horses are Units, appear to no longer be units after you ride them.
+			//return !isUnit;
 		}
 	}
 }

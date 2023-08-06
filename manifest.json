@@ -5,6 +5,6 @@
     "description": "Lets your horses drink water from wells.",
     "dependencies": [
         "BepInEx-BepInExPack_V_Rising-1.0.0", 
-        "molenzwiebel-Wetstone-1.1.0"
+        "deca-Bloodstone-1.4.0"
     ]
 }

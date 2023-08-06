@@ -8,7 +8,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using Wetstone.API;
+using Bloodstone.API;
+using LeadAHorseToWater.VCFCompat;
 
 namespace LeadAHorseToWater.Processes
 {
@@ -29,8 +30,8 @@ namespace LeadAHorseToWater.Processes
 				foreach (var horse in horses)
 				{
 					if (_knownHorses.Contains(horse.Index)) continue;
-					var networkId = VWorld.Server.EntityManager.GetComponentData<NetworkId>(horse);
-					var position = VWorld.Server.EntityManager.GetComponentData<Translation>(horse).Value;
+					var networkId = horse.Read<NetworkId>();
+					var position = horse.Read<Translation>();
 
 					_log.LogDebug($"Found horse {horse.Index} NetworkId={networkId} at {position}");
 					_knownHorses.Add(horse.Index);
@@ -48,12 +49,12 @@ namespace LeadAHorseToWater.Processes
 				{
 					if (horse.Index == NextBabyData.parentId1 || horse.Index == NextBabyData.parentId2) continue;
 
-					var position = VWorld.Server.EntityManager.GetComponentData<Translation>(horse).Value;
+					var position = horse.Read<Translation>().Value;
 					var distanceFromBaby = Vector3.Distance(position, NextBabyData.position);
 
 					if (distanceFromBaby < closestDistance)
 					{
-						_log.LogDebug($"Closestr horse <{horse.Index}> - {distanceFromBaby}");
+						_log.LogDebug($"Closest horse <{horse.Index}> - {distanceFromBaby}");
 
 						closestDistance = distanceFromBaby;
 						baby = horse;
@@ -66,14 +67,14 @@ namespace LeadAHorseToWater.Processes
 					NextBabyData = null;
 					return;
 				}
-
+				
 				VWorld.Server.EntityManager.SetComponentData<Team>(baby, new()
 				{
 					Value = NextBabyData.team.Value
 				});
 
-				baby.WithComponentData((ref NameableInteractable ni) => ni.Name = NextBabyData.name);
-				baby.WithComponentData((ref Mountable mount) =>
+				baby.With((ref NameableInteractable ni) => ni.Name = NextBabyData.name);
+				baby.With((ref Mountable mount) =>
 				{
 					mount.MaxSpeed = NextBabyData.speed;
 					mount.Acceleration = NextBabyData.acceleration;

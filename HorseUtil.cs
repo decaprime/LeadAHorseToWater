@@ -3,26 +3,32 @@
 	using ProjectM;
 	using Unity.Entities;
 	using Unity.Transforms;
-	using Wetstone.API;
+	using Bloodstone.API;
 	using Unity.Collections;
 	using Unity.Mathematics;
 	using System.Collections.Generic;
+	using System.Linq;
 
 	internal static class HorseUtil
 	{
 		private static Entity empty_entity = new Entity();
 
+		private static Dictionary<string, PrefabGUID> HorseGuids = new()
+		{
+				{ "Regular", new(1149585723) },
+				//{ "Gloomrot", new(1213710323) },
+				{ "Spectral", new(2022889449) },
+				// HARD CRASH { "Vampire", new(-1502865710) },// CHAR_Mount_Horse
+		};
+
+
+		private static System.Random _r = new System.Random();
 		internal static void SpawnHorse(int countlocal, float3 localPos)
 		{
-			// TODO: Cache and Improve
-			var prefabCollectionSystem = VWorld.Server.GetExistingSystem<PrefabCollectionSystem>();
-			var entityName = "CHAR_Town_Horse";
-			foreach (var kv in prefabCollectionSystem._PrefabGuidToNameMap)
-			{
-				if (kv.Value.ToString().ToLower() != entityName.ToLower()) continue;
-				VWorld.Server.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(empty_entity, kv.Key, new float3(localPos.x, 0, localPos.z), countlocal, 1, 2, -1);
-				break;
-			}
+			//var horses = _r.Next(3);
+			var horse = HorseGuids["Regular"];
+			// TODO: Cache and Improve (np now :P)
+			VWorld.Server.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(empty_entity, horse, localPos, countlocal, 1, 2, -1);
 		}
 
 		internal static NativeArray<Entity> GetHorses()
@@ -44,7 +50,7 @@
 		internal static Entity? GetClosetHorse(Entity e)
 		{
 			var horseEntityQuery = GetHorses();
-			 
+
 			var origin = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(e).Position;
 			var closest = float.MaxValue;
 
@@ -74,7 +80,6 @@
 				var position = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horse).Position;
 				var distance = UnityEngine.Vector3.Distance(origin, position); // wait really?
 				if (distance < radius)
-
 				{
 					results.Add(horse);
 				}
