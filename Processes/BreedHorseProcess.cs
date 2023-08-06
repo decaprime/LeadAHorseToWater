@@ -1,9 +1,9 @@
-﻿using BepInEx.Logging;
-using ProjectM;
-using ProjectM.Network;
 using System;
 using System.Collections.Generic;
+using BepInEx.Logging;
 using Bloodstone.API;
+using ProjectM;
+using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -21,7 +21,7 @@ namespace LeadAHorseToWater.Processes
 		public static BabyHorseData NextBabyData = null;
 
 		private static HashSet<int> _knownHorses = new();
-		
+
 
 		public static void Update(NativeArray<Entity> horses)
 		{
@@ -48,7 +48,7 @@ namespace LeadAHorseToWater.Processes
 				foreach (var horse in horses)
 				{
 					if (horse.Index == NextBabyData.parentId1 || horse.Index == NextBabyData.parentId2) continue;
-					
+
 					VWorld.Server.EntityManager.TryGetComponentData<Translation>(horse, out var position);
 					var distanceFromBaby = Vector3.Distance(position.Value, NextBabyData.position);
 
@@ -68,7 +68,7 @@ namespace LeadAHorseToWater.Processes
 					NextBabyData = null;
 					return;
 				}
-				
+
 				VWorld.Server.EntityManager.SetComponentData<Team>(baby, new()
 				{
 					Value = NextBabyData.team.Value

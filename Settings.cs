@@ -1,12 +1,12 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.Unity.IL2CPP;
-using BepInEx.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
 
 namespace LeadAHorseToWater
 {
@@ -19,7 +19,7 @@ namespace LeadAHorseToWater
 		public static ConfigEntry<int> SECONDS_DRINK_PER_TICK;
 		public static ConfigEntry<int> MAX_DRINK_AMOUNT;
 		public static String DRINKING_PREFIX = "[Drinking] ";
-		
+
 		public static ConfigEntry<bool> ENABLE_RENAME;
 		public static bool ENABLE_PREFIX_COLOR = true;
 		public static ConfigEntry<string> ENABLED_WELL_PREFAB;
@@ -36,11 +36,11 @@ namespace LeadAHorseToWater
 
 		public static HashSet<int> EnabledWellPrefabs = new();
 
-		
+
 
 		internal static void Initialize(ConfigFile config)
 		{
-			
+
 			DISTANCE_REQUIRED = config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be withdin this distance from well. (5 =1 tile)");
 			SECONDS_DRINK_PER_TICK = config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 			MAX_DRINK_AMOUNT = config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");

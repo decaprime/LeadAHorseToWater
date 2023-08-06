@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using BepInEx.Logging;
 
 namespace LeadAHorseToWater.VCFCompat
 {
-	using ProjectM;
-	using Unity.Entities;
-	using Unity.Transforms;
-	using Bloodstone.API;
-	using Unity.Collections;
-	using Unity.Mathematics;
 	using System.Collections.Generic;
+	using Bloodstone.API;
+	using ProjectM;
+	using Unity.Collections;
+	using Unity.Entities;
+	using Unity.Mathematics;
+	using Unity.Transforms;
 
 	internal static class HorseUtil
 	{
@@ -49,7 +49,7 @@ namespace LeadAHorseToWater.VCFCompat
 		internal static Entity? GetClosetHorse(Entity e)
 		{
 			var horseEntityQuery = GetHorses();
-			 
+
 			var origin = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(e).Position;
 			var closest = float.MaxValue;
 
@@ -76,7 +76,7 @@ namespace LeadAHorseToWater.VCFCompat
 			if (!em.HasComponent<Team>(e)) return false;
 			var teamhorse = getTeam[e];
 			var isUnit = Team.IsInUnitTeam(teamhorse);
-                
+
 			// Wild horses are Units, appear to no longer be units after you ride them.
 			return !isUnit;
 
