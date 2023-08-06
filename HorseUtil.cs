@@ -1,13 +1,13 @@
-﻿namespace LeadAHorseToWater.VCFCompat
+namespace LeadAHorseToWater.VCFCompat
 {
-	using ProjectM;
-	using Unity.Entities;
-	using Unity.Transforms;
-	using Bloodstone.API;
-	using Unity.Collections;
-	using Unity.Mathematics;
 	using System.Collections.Generic;
 	using System.Linq;
+	using Bloodstone.API;
+	using ProjectM;
+	using Unity.Collections;
+	using Unity.Entities;
+	using Unity.Mathematics;
+	using Unity.Transforms;
 
 	internal static class HorseUtil
 	{

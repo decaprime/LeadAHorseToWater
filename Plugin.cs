@@ -1,9 +1,9 @@
-﻿using BepInEx;
+using System.Reflection;
+using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using HarmonyLib;
-using System.Reflection;
 using Bloodstone.API;
+using HarmonyLib;
 
 namespace LeadAHorseToWater
 {
@@ -56,7 +56,7 @@ namespace LeadAHorseToWater
 			{
 				VCFCompat.Commands.Unregister();
 			}
-			
+
 			_harmony?.UnpatchSelf();
 			return true;
 		}

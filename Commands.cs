@@ -1,18 +1,18 @@
-﻿using BepInEx.Logging;
+using BepInEx.Logging;
 
 namespace LeadAHorseToWater.VCFCompat;
 
+using System;
+using System.Text;
+using Bloodstone.API;
+using Il2CppInterop.Runtime;
+using LeadAHorseToWater.Processes;
 using ProjectM;
+using ProjectM.Network;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using Unity.Mathematics;
-using System;
-using Bloodstone.API;
-using LeadAHorseToWater.Processes;
-using ProjectM.Network;
-using System.Text;
-using Il2CppInterop.Runtime;
 using static Bloodstone.API.VExtensions;
 
 public static partial class Commands
@@ -183,7 +183,7 @@ public static partial class Commands
 					return;
 				}
 
-				
+
 				var mountData = horse.Entity.Read<Mountable>();
 				var tag = StatTag(mountData.MaxSpeed, mountData.Acceleration, mountData.RotationSpeed / 10f);
 
@@ -199,7 +199,7 @@ public static partial class Commands
 			[Command("speed", adminOnly: true)]
 			public void SetSpeed(ChatCommandContext ctx, Horse horse, float speed)
 			{
-				 horse.Entity.With((ref Mountable mount) => mount.MaxSpeed = speed);
+				horse.Entity.With((ref Mountable mount) => mount.MaxSpeed = speed);
 				ctx.Reply($"Horse speed set to {speed}");
 			}
 

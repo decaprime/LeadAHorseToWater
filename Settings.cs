@@ -1,7 +1,7 @@
-﻿using BepInEx.Configuration;
-using BepInEx.Logging;
 using System;
 using System.Collections.Generic;
+using BepInEx.Configuration;
+using BepInEx.Logging;
 
 namespace LeadAHorseToWater;
 
@@ -29,7 +29,7 @@ public static class Settings
 
 	internal static void Initialize(ConfigFile config)
 	{
-		
+
 		DISTANCE_REQUIRED = config.Bind<float>("Server", "DistanceRequired", 5.0f, "Horses must be within this distance from well. (5 =1 tile)");
 		SECONDS_DRINK_PER_TICK = config.Bind<int>("Server", "SecondsDrinkPerTick", 30, "How many seconds added per drink tick (~1.5seconds), default values would be about 24 minutes for the default max amount at fountain.");
 		MAX_DRINK_AMOUNT = config.Bind<int>("Server", "MaxDrinkAmount", 28800, "Time in seconds, default value is roughly amount of time when you take wild horses.");

@@ -22,11 +22,11 @@ internal static class ECSExtensions
 	internal static bool Has<T>(this Entity entity) where T : struct
 	{
 		int typeIndex = TypeManager.GetTypeIndex(Il2CppType.Of<T>());
-		
+
 		return VWorld.Game.EntityManager.HasComponentRaw(entity, typeIndex);
 	}
 
-	internal unsafe static T RW<T>(this Entity entity) where T: struct
+	internal unsafe static T RW<T>(this Entity entity) where T : struct
 	{
 		int typeIndex = TypeManager.GetTypeIndex(Il2CppType.Of<T>());
 		T* componentDataRawRW = (T*)VWorld.Game.EntityManager.GetComponentDataRawRW(entity, typeIndex);
@@ -41,7 +41,7 @@ internal static class ECSExtensions
 	{
 		int typeIndex = TypeManager.GetTypeIndex(Il2CppType.Of<T>());
 		T* componentDataRawRO = (T*)VWorld.Game.EntityManager.GetComponentDataRawRO(entity, typeIndex);
-		if(componentDataRawRO == null)
+		if (componentDataRawRO == null)
 		{
 			throw new InvalidOperationException($"Failure to access ReadOnly <{typeof(T).Name}> typeIndex({typeIndex}) on entity({entity}).");
 		}

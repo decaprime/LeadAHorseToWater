@@ -1,13 +1,13 @@
-﻿using BepInEx.Logging;
+using System;
+using BepInEx.Logging;
+using Bloodstone.API;
 using HarmonyLib;
 using LeadAHorseToWater.Processes;
 using ProjectM;
-using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
-using Bloodstone.API;
 
 namespace LeadAHorseToWater.Patches
 {

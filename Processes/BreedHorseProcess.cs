@@ -1,15 +1,15 @@
-﻿using BepInEx.Logging;
-using ProjectM;
-using ProjectM.Network;
 using System;
 using System.Collections.Generic;
+using BepInEx.Logging;
+using Bloodstone.API;
+using LeadAHorseToWater.VCFCompat;
+using ProjectM;
+using ProjectM.Network;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using Bloodstone.API;
-using LeadAHorseToWater.VCFCompat;
 
 namespace LeadAHorseToWater.Processes
 {
@@ -67,7 +67,7 @@ namespace LeadAHorseToWater.Processes
 					NextBabyData = null;
 					return;
 				}
-				
+
 				VWorld.Server.EntityManager.SetComponentData<Team>(baby, new()
 				{
 					Value = NextBabyData.team.Value

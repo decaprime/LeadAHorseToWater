@@ -1,8 +1,8 @@
-﻿using BepInEx.Logging;
+using BepInEx.Logging;
+using Bloodstone.API;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
-using Bloodstone.API;
 
 namespace LeadAHorseToWater.Processes;
 
@@ -10,7 +10,7 @@ public class CleanUpPrefixProcess
 {
 	private static bool Processed = false;
 	private static ManualLogSource _log => Plugin.LogInstance;
-	
+
 	public static void Update(NativeArray<Entity> horses)
 	{
 		if (Processed) return;
