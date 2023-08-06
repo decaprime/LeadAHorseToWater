@@ -3,7 +3,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>LeadAHorseToWater</AssemblyName>
     <Description>Lead a horse to a well to make it drink.</Description>
-    <Version>0.5.11</Version>
+    <Version>0.6.9</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <AssemblyVersion>0.5.11.0</AssemblyVersion>
@@ -20,6 +20,6 @@
 	  <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
 	  <PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
 	  <PackageReference Include="VRising.VampireCommandFramework" Version="0.8.*" />
-	  <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.5.57575071" />
+	  <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.5.*" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
 using Bloodstone.API;
-using LeadAHorseToWater.VCFCompat;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;
@@ -63,7 +62,8 @@ public static class BreedHorseProcess
 
 			if (closestDistance > 8) // IDK TODO tune this epislon
 			{
-				_log.LogWarning("Closest horse is too far so I give up, resetting baby data");
+				BreedTimerProcess.Instance.StopCooldown();
+				_log.LogDebug("Closest horse is too far so I give up, resetting baby data");
 				NextBabyData = null;
 				return;
 			}

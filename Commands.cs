@@ -1,4 +1,9 @@
+using System.Collections.Generic;
+using BepInEx.Core.Logging.Interpolation;
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
+using Il2CppSystem.Collections;
+using UnityEngine;
 
 namespace LeadAHorseToWater.VCFCompat;
 
@@ -21,9 +26,8 @@ public static partial class Commands
 
 	static Commands()
 	{
-		// Enabled = IL2CPPChainloader.Instance.Plugins.TryGetValue("gg.deca.VampireCommandFramework", out var info);
-		Enabled = true; // hard required for Bloodstone
-						// if (Enabled) _log.LogWarning($"VCF Version: {info.Metadata.Version}");
+		Enabled = IL2CPPChainloader.Instance.Plugins.TryGetValue("gg.deca.VampireCommandFramework", out var info);
+		if (Enabled) _log.LogWarning($"VCF Version: {info.Metadata.Version}");
 	}
 
 	public static bool Enabled { get; private set; }
@@ -73,13 +77,27 @@ public static partial class Commands
 			{
 				var character = ctx.Event.SenderCharacterEntity;
 
-				if (BreedHorseProcess.NextBabyData != null)
+				if (BreedTimerProcess.Instance.IsBreedCooldownActive && Settings.ENABLE_HORSE_BREED_COOLDOWN.Value)
 				{
-					throw ctx.Error("There's already a pair breeding, try again in a few seconds.");
+					throw ctx.Error(
+						$"You've already bred recently, try again in {Mathf.FloorToInt(BreedTimerProcess.Instance.RemainingTime)} second(s).");
 				}
 
-				if (!InventoryUtilities.TryGetInventoryEntity(VWorld.Server.EntityManager, character, out Entity invEntity))
+				if (BreedHorseProcess.NextBabyData != null)
 				{
+					throw ctx.Error($"There's already a pair breeding, try again in a few seconds.");
+				}
+
+				if (Settings.ENABLE_HORSE_BREED_COOLDOWN.Value)
+				{
+					BreedTimerProcess.Instance.StartCooldown();
+				}
+
+
+				if (!InventoryUtilities.TryGetInventoryEntity(VWorld.Server.EntityManager, character,
+						out Entity invEntity))
+				{
+					BreedTimerProcess.Instance.StopCooldown();
 					return;
 				}
 
@@ -89,15 +107,17 @@ public static partial class Commands
 					throw ctx.Error($"Must have only two nearby horses, found {horses.Count}");
 				}
 
+
 				var breedItem = new PrefabGUID(Settings.HORSE_BREED_PREFAB.Value);
 				var breedAmount = Settings.HORSE_BREED_COST.Value;
 
-				var didRemove = InventoryUtilitiesServer.TryRemoveItem(VWorld.Server.EntityManager, invEntity, breedItem, breedAmount);
-				_log?.LogWarning($"Tried to remove {breedAmount}, removed={didRemove}");
+				var didRemove = InventoryUtilitiesServer.TryRemoveItem(VWorld.Server.EntityManager, invEntity,
+					breedItem, breedAmount);
 				if (!didRemove)
 				{
-					throw ctx.Error("You must have at least one special fish in your inventory.");
-				};
+					BreedTimerProcess.Instance.StopCooldown();
+					throw ctx.Error($"You must have at least {breedAmount} {Settings.HORSE_BREED_ITEM_NAME.Value} in your inventory.");
+				}
 
 				var pos1 = horses[0].Read<Translation>().Value;
 				var pos2 = horses[1].Read<Translation>().Value;
@@ -113,7 +133,6 @@ public static partial class Commands
 				sb.AppendLine("Offspring Details");
 				var applyMutation = (string label, float parent1, float parent2, float maxValue) =>
 				{
-
 					float parentValue;
 					string par1 = parent1.ToString("F1"), par2 = parent2.ToString("F2");
 					string parentValueFormatted;
@@ -145,8 +164,6 @@ public static partial class Commands
 				var babySpeed = applyMutation("Speed", mountData1.MaxSpeed, mountData2.MaxSpeed, Settings.HORSE_BREED_MAX_SPEED.Value);
 				var babyAcceleration = applyMutation("Acceleration", mountData1.Acceleration, mountData2.Acceleration, Settings.HORSE_BREED_MAX_ACCELERATION.Value);
 				var babyRotation = applyMutation("Rotation", mountData1.RotationSpeed / 10f, mountData2.RotationSpeed / 10f, Settings.HORSE_BREED_MAX_ROTATION.Value);
-
-				// todo: check we can breed in that these are ours
 				var team = horses[0].Read<Team>();
 
 				HorseUtil.SpawnHorse(1, babyPos);
@@ -167,10 +184,10 @@ public static partial class Commands
 				var nameComponent = VWorld.Server.EntityManager.GetComponentData<NameableInteractable>(horse.Entity);
 				var name = nameComponent.Name.ToString();
 
-				var statStart = name.LastIndexOf("Ⓢ");
+				var statStart = name.LastIndexOf("Ⓢ", StringComparison.Ordinal);
 				if (statStart > 0)
 				{
-					var colorStart = name.LastIndexOf("<color=");
+					var colorStart = name.LastIndexOf("<color=", StringComparison.Ordinal);
 					if (colorStart > 0 && colorStart < statStart)
 					{
 						name = name[..(colorStart - 1)];
@@ -242,7 +259,7 @@ public static partial class Commands
 
 				VWorld.Server.EntityManager.SetComponentData<PlayerTeleportDebugEvent>(entity, new()
 				{
-					Position = position,
+					Position = position.xyz,
 					Target = PlayerTeleportDebugEvent.TeleportTarget.Self,
 				});
 
@@ -252,17 +269,18 @@ public static partial class Commands
 			[Command("spawn", adminOnly: true)]
 			public void HorseMe(ChatCommandContext ctx, int num = 1)
 			{
-				float3 userPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
-				float3 charPos = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(ctx.Event.SenderCharacterEntity).Position;
-				HorseUtil.SpawnHorse(num, new float3(charPos.x, userPos.y, charPos.z));
+				float3 localPos = VWorld.Server.EntityManager
+					.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
+				HorseUtil.SpawnHorse(num, localPos);
 				ctx.Reply($"Spawned {num} horse{(num > 1 ? "s" : "")} near you.");
 			}
 
-			[Command("whistle", adminOnly: true)]
+			[Command("whistle", shortHand: "w", adminOnly: true)]
 			public void Whistle(ChatCommandContext ctx, Horse horse = null)
 			{
 				horse ??= GetRequiredClosestHorse(ctx);
-				float3 userPos = VWorld.Server.EntityManager.GetComponentData<Translation>(ctx.Event.SenderCharacterEntity).Value;
+				float3 userPos = VWorld.Server.EntityManager
+					.GetComponentData<Translation>(ctx.Event.SenderUserEntity).Value;
 				float3 horsePos = VWorld.Server.EntityManager.GetComponentData<Translation>(horse.Entity).Value;
 
 				horse.Entity.With((ref Translation t) => { t.Value = userPos; });

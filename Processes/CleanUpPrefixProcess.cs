@@ -21,14 +21,14 @@ public class CleanUpPrefixProcess
 			{
 				var name = nameable.Name.ToString();
 
-				var prefix = Settings.ENABLE_PREFIX_COLOR.Value ?
-							$"<color=#0ef>{Settings.DRINKING_PREFIX.Value}</color> " :
-							$"{Settings.DRINKING_PREFIX.Value} ";
+				var prefix = Settings.ENABLE_PREFIX_COLOR ?
+					$"<color=#0ef>{Settings.DRINKING_PREFIX}</color> " :
+					$"{Settings.DRINKING_PREFIX} ";
 				bool hasOldPrefix = name.StartsWith(prefix);
 				if (hasOldPrefix)
 				{
 					nameable.Name = name.Substring(prefix.Length);
-					_log.LogInfo($"Cleaned up prefix for {nameable.Name}");
+					_log.LogDebug($"Cleaned up prefix for {nameable.Name}");
 				}
 			});
 

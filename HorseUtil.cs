@@ -69,6 +69,20 @@ internal static class HorseUtil
 		return closestHorse;
 	}
 
+	internal static bool isTamed(Entity e)
+	{
+		EntityManager em = VWorld.Server.EntityManager;
+		ComponentDataFromEntity<Team> getTeam = VWorld.Server.EntityManager.GetComponentDataFromEntity<Team>();
+
+		if (!em.HasComponent<Team>(e)) return false;
+		var teamhorse = getTeam[e];
+		var isUnit = Team.IsInUnitTeam(teamhorse);
+
+		// Wild horses are Units, appear to no longer be units after you ride them.
+		return !isUnit;
+
+	}
+
 	internal static List<Entity> ClosestHorses(Entity e, float radius = 5f)
 	{
 		var horses = GetHorses();

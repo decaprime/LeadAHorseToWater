@@ -42,10 +42,10 @@ public static class FeedableInventorySystem_Update_Patch
 
 			BreedHorseProcess.Update(horses);
 			CleanUpPrefixProcess.Update(horses);
+			BreedTimerProcess.Instance.Update();
 
 			foreach (var horseEntity in horses)
 			{
-				// DumpHorseComponents(horseEntity);
 				if (!IsHorseWeFeed(horseEntity, __instance)) continue;
 
 				var localToWorld = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(horseEntity);
@@ -83,20 +83,6 @@ public static class FeedableInventorySystem_Update_Patch
 		}
 	}
 
-
-	private static bool _calledOnce = false;
-	private static void DumpHorseComponents(Entity e)
-	{
-		if (_calledOnce) return;
-		_calledOnce = true;
-
-		_log?.LogWarning($"Horse <{e.Index}> Components:");
-		foreach (var component in VWorld.Server.EntityManager.GetComponentTypes(e))
-		{
-			_log?.LogWarning($"\t{component}");
-		}
-	}
-
 	private const string DRINKING_PREFIX = "♻ ";
 
 	private static void HandleRename(Entity horseEntity, bool closeEnough)
@@ -124,13 +110,20 @@ public static class FeedableInventorySystem_Update_Patch
 
 	private static bool IsHorseWeFeed(Entity horse, ComponentSystemBase instance)
 	{
-		return true; // TODO: 
-					 //var tc = TeamChecker.CreateWithoutCache(instance);
-					 //var horseTeam = tc.GetTeam(horse);
-					 //var isUnit = tc.IsUnit(horseTeam);
-					 //// _log?.LogDebug($"Horse <{horse.Index}]> IsUnit={isUnit}");
+		EntityManager em = instance.World.EntityManager;
+		ComponentDataFromEntity<Team> getTeam = instance.GetComponentDataFromEntity<Team>();
 
-		//// Wild horses are Units, appear to no longer be units after you ride them.
-		//return !isUnit;
+		if (em.HasComponent<Team>(horse))
+		{
+			var teamhorse = getTeam[horse];
+			var isUnit = Team.IsInUnitTeam(teamhorse);
+
+			// Wild horses are Units, appear to no longer be units after you ride them.
+			return !isUnit;
+		}
+
+		// Handle the case when the horse entity does not have the Team component.
+		_log?.LogDebug($"Horse <{horse.Index}> does not have Team component. {horse}");
+		return false;
 	}
 }

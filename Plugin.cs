@@ -8,8 +8,9 @@ using HarmonyLib;
 namespace LeadAHorseToWater;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("gg.deca.VampireCommandFramework", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("gg.deca.Bloodstone")]
-[Bloodstone.API.Reloadable]
+[Reloadable]
 public class Plugin : BasePlugin, IRunOnInitialized
 {
 	private Harmony _harmony;
@@ -27,6 +28,8 @@ public class Plugin : BasePlugin, IRunOnInitialized
 			Log.LogWarning("This plugin is a server-only plugin.");
 			return;
 		}
+		BreedTimerProcess process = new();
+		process.Setup();
 	}
 
 	public void OnGameInitialized()
