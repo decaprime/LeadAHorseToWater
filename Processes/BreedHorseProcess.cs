@@ -62,7 +62,6 @@ public static class BreedHorseProcess
 
 			if (closestDistance > 8) // IDK TODO tune this epislon
 			{
-				BreedTimerProcess.Instance.StopCooldown();
 				_log.LogDebug("Closest horse is too far so I give up, resetting baby data");
 				NextBabyData = null;
 				return;

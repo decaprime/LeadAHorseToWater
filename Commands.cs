@@ -77,28 +77,15 @@ public static partial class Commands
 			{
 				var character = ctx.Event.SenderCharacterEntity;
 
-				if (BreedTimerProcess.Instance.IsBreedCooldownActive && Settings.ENABLE_HORSE_BREED_COOLDOWN.Value)
-				{
-					throw ctx.Error(
-						$"You've already bred recently, try again in {Mathf.FloorToInt(BreedTimerProcess.Instance.RemainingTime)} second(s).");
-				}
-
 				if (BreedHorseProcess.NextBabyData != null)
 				{
 					throw ctx.Error($"There's already a pair breeding, try again in a few seconds.");
 				}
 
-				if (Settings.ENABLE_HORSE_BREED_COOLDOWN.Value)
-				{
-					BreedTimerProcess.Instance.StartCooldown();
-				}
-
-
 				if (!InventoryUtilities.TryGetInventoryEntity(VWorld.Server.EntityManager, character,
 						out Entity invEntity))
 				{
-					BreedTimerProcess.Instance.StopCooldown();
-					return;
+					throw ctx.Error($"Could not find inventory, have you not created a character yet?");
 				}
 
 				var horses = HorseUtil.ClosestHorses(character);
@@ -107,15 +94,12 @@ public static partial class Commands
 					throw ctx.Error($"Must have only two nearby horses, found {horses.Count}");
 				}
 
-
 				var breedItem = new PrefabGUID(Settings.HORSE_BREED_PREFAB.Value);
 				var breedAmount = Settings.HORSE_BREED_COST.Value;
 
-				var didRemove = InventoryUtilitiesServer.TryRemoveItem(VWorld.Server.EntityManager, invEntity,
-					breedItem, breedAmount);
+				var didRemove = InventoryUtilitiesServer.TryRemoveItem(VWorld.Server.EntityManager, invEntity, breedItem, breedAmount);
 				if (!didRemove)
 				{
-					BreedTimerProcess.Instance.StopCooldown();
 					throw ctx.Error($"You must have at least {breedAmount} {Settings.HORSE_BREED_ITEM_NAME.Value} in your inventory.");
 				}
 

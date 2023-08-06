@@ -39,10 +39,7 @@ public static class FeedableInventorySystem_Update_Patch
 			}
 
 			Wells.Update();
-
 			BreedHorseProcess.Update(horses);
-			CleanUpPrefixProcess.Update(horses);
-			BreedTimerProcess.Instance.Update();
 
 			foreach (var horseEntity in horses)
 			{

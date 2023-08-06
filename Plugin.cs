@@ -28,8 +28,6 @@ public class Plugin : BasePlugin, IRunOnInitialized
 			Log.LogWarning("This plugin is a server-only plugin.");
 			return;
 		}
-		BreedTimerProcess process = new();
-		process.Setup();
 	}
 
 	public void OnGameInitialized()
