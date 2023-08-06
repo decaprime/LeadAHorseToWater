@@ -43,7 +43,7 @@ Powerful admin rename, this allows you do escape normal naming restrictions and 
 
 #### 🔒 `.horse whistle [horse=]` / `.horse warp [horse=]`
 
-Whistle trys to brings the horse to you, warp teleports you to the horse.
+Whistle tries to brings the horse to you, warp teleports you to the horse.
 
 #### 🔒 `.horse speed [horse=] (speed)`
 #### 🔒 `.horse acceleration [horse=] (acceleration)` 
@@ -67,10 +67,25 @@ Spawns either one or `count` horses around you.
 ```ini
 [Breeding]
 
+## Enables the cooldown for breeding horses.
+# Setting type: Boolean
+# Default value: true
+EnableBreedingCooldown = true
+
+## This is the cooldown in seconds for breeding horses.
+# Setting type: Int32
+# Default value: 600
+BreedingCooldown = 600
+
 ## This prefab is consumed as a cost to breed horses.
 # Setting type: Int32
 # Default value: -570287766
 BreedingRequiredItem = -570287766
+
+## This is the name of the required item that will be consumed.
+# Setting type: String
+# Default value: special fish
+BreedingCostItemName = special fish
 
 ## This is the amount of the required item consumed.
 # Setting type: Int32

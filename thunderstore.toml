@@ -4,15 +4,15 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "deca"
 name = "LeadAHorseToWater"
-versionNumber = "0.6.0"
+versionNumber = "0.7.0"
 description = "Lets your horses drink water from wells. Adds horse breeding and other commands."
 websiteUrl = "https://github.com/decaprime/LeadAHorseToWater"
 containsNsfwContent = false
 
 [package.dependencies]
-BepInEx-BepInExPack_V_Rising = "1.0.0"
-molenzwiebel-Wetstone = "1.1.0"
-deca-VampireCommandFramework = "0.4.12"
+BepInEx-BepInExPack_V_Rising = "1.668.5"
+deca-Bloodstone = "0.1.4"
+deca-VampireCommandFramework = "0.8.0"
 
 [build]
 icon = "./icon.png"
