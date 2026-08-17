@@ -28,6 +28,9 @@ For commands to load you must have [VampireCommandFramework](https://github.com/
 
 This process takes two horses and consumes <ins>_BreedingRequiredItem_</ins> * <ins>_BreedingCostAmount_</ins> from the player's inventory. The resulting horse will be a random mix of the two parents' stats as a 50/50 chance of inheriting each trait from either parent. Then randomly +/- <ins>_MutationRange_</ins> is applied based on the max stat for each attribute. Finally values are capped at <ins>_MaxSpeed_</ins>, <ins>_MaxAcceleration_</ins>, <ins>_MaxRotation_</ins>. The resulting horse will be named after the first parent.
 
+> **Tip:** the default breeding item is the **twilight snapper** (prefab `-570287766`).
+> You can change it to any item via `BreedingRequiredItem` in the config.
+
 ![image](https://user-images.githubusercontent.com/62450933/190880543-92d31267-34ec-4292-bb03-b12feee5a95b.png)
 
 #### `.horse tag-stats [horse=]`
@@ -46,7 +49,7 @@ Powerful admin rename, this allows you do escape normal naming restrictions and 
 Whistle tries to brings the horse to you, warp teleports you to the horse.
 
 #### 🔒 `.horse speed [horse=] (speed)`
-#### 🔒 `.horse acceleration [horse=] (acceleration)` 
+#### 🔒 `.horse acceleration [horse=] (acceleration)`
 #### 🔒 `.horse rotation [horse=] (rotation)`
 
 Set the horse's stats. These values are **not** capped by <ins>_MaxSpeed_</ins>, <ins>_MaxAcceleration_</ins>, or <ins>_MaxRotation_</ins>. Note that the game represents rotation as 10x the value displayed in the UI but the commands handle this for you and you should refer to the values as you see them in the UI.
@@ -59,23 +62,31 @@ Removes the horse immediately without any loot or corpse.
 
 **WARNING**: This command will remove horses within the radius of the player. It choose `percentage` of the horses within the `radius`. This command is very useful for cleaning up a large number of horses. It is recommended to use a small radius to start. The default radius of 5 is about 1 tile. The default percentage 1 means 100% of the horses within the radius will be removed.
 
+#### 🔒 `.horse famish [radius=5]`
+
+Make all horses within the `radius` hungry enough to feed. (depletes satiety)
+
 #### 🔒 `.horse spawn [count=1]`
 
 Spawns either one or `count` horses around you.
 
+
+## 🚰 About the wells
+
+The mod does **not** use wells out in the world, it uses the wells built connected to a castle.
+
+By default it considers the **Stone** and **Large** fountains. Options are
+`stone, iron, bronze, small, large` — set them in `EnabledWellPrefabs`.
+
+The horse must be within **`DistanceRequired`** of the fountain. Default is `5`,
+which is about **one tile** — so right up against it.
+
+When a horse is drinking, a **♻** is added to the front of its name (turn this off
+with `EnableRename = false`).
+
 # Configurable Values
 ```ini
 [Breeding]
-
-## Enables the cooldown for breeding horses.
-# Setting type: Boolean
-# Default value: true
-EnableBreedingCooldown = true
-
-## This is the cooldown in seconds for breeding horses.
-# Setting type: Int32
-# Default value: 600
-BreedingCooldown = 600
 
 ## This prefab is consumed as a cost to breed horses.
 # Setting type: Int32
@@ -84,8 +95,8 @@ BreedingRequiredItem = -570287766
 
 ## This is the name of the required item that will be consumed.
 # Setting type: String
-# Default value: special fish
-BreedingCostItemName = special fish
+# Default value: special fish (twilight snapper)
+BreedingCostItemName = special fish (twilight snapper)
 
 ## This is the amount of the required item consumed.
 # Setting type: Int32

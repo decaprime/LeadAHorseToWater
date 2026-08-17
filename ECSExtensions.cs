@@ -1,6 +1,6 @@
 
 using System;
-using Bloodstone.API;
+using LeadAHorseToWater.Compat;
 using Il2CppInterop.Runtime;
 using Unity.Entities;
 

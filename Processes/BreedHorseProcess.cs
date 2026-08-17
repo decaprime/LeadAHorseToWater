@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
-using Bloodstone.API;
+using LeadAHorseToWater.Compat;
 using ProjectM;
 using ProjectM.Network;
 using Unity.Collections;

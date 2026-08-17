@@ -2,6 +2,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LeadAHorseToWater.Processes;
 using ProjectM;
+using Stunlock.Core;
 using Unity.Entities;
 
 namespace LeadAHorseToWater.Patches;
@@ -16,7 +17,7 @@ public static class PlaceTileModelSystem_Patch
 	public static void Moving(PlaceTileModelSystem __instance, EntityManager entityManager, Entity tileModelEntity, Entity character)
 	{
 		// ideally we can just invalidate this tileModelEntity and get it's location ext hooked update
-		FeedableInventorySystem_Update_Patch.Wells.InvalidateEntity(tileModelEntity);
+		LeadAHorseToWaterSystem.Wells.InvalidateEntity(tileModelEntity);
 		_log?.LogDebug($"Pseudo Moving Event Entity:{tileModelEntity.Index}");
 	}
 
@@ -27,7 +28,7 @@ public static class PlaceTileModelSystem_Patch
 		// we don't even need the entity id, just that a well was destroyed so we can invalidate the cache
 		// and search for which entities no longer match a well. We may also scan for some in-destruction event/component.
 		// we can also use the location to filter our cache and only invalidate the wells near the destroying player.			
-		FeedableInventorySystem_Update_Patch.Wells.InvalidateAll();
+		LeadAHorseToWaterSystem.Wells.InvalidateAll();
 		_log?.LogDebug($"Pseudo Destroy Event");
 	}
 
@@ -38,7 +39,7 @@ public static class PlaceTileModelSystem_Patch
 		if (!WellCacheProcess.IsWellPrefab(prefabGuid)) return;
 		// we need to scan again if we build, new entity id will need to be tracked, is this prefab entity id the well id?
 		// however we can do an 'active' component scan to find the well id since it should be near a player
-		FeedableInventorySystem_Update_Patch.Wells.PlanScanForAdded();
+		LeadAHorseToWaterSystem.Wells.PlanScanForAdded();
 		_log?.LogDebug($"Pseudo Building Event prefab: {prefabGuid}, entity: {prefab.Index}");
 	}
 }

@@ -9,16 +9,17 @@ namespace LeadAHorseToWater.VCFCompat;
 
 using System;
 using System.Text;
-using Bloodstone.API;
+using LeadAHorseToWater.Compat;
 using Il2CppInterop.Runtime;
 using LeadAHorseToWater.Processes;
 using ProjectM;
 using ProjectM.Network;
+using Stunlock.Core;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using VampireCommandFramework;
-using static Bloodstone.API.VExtensions;
+
 
 public static partial class Commands
 {
@@ -290,11 +291,7 @@ public static partial class Commands
 			public void Kill(ChatCommandContext ctx, Horse horse = null)
 			{
 				horse ??= GetRequiredClosestHorse(ctx);
-				horse.Entity.With((ref Health t) =>
-				{
-					t.IsDead = true;
-				});
-				VWorld.Server.EntityManager.AddComponent(horse.Entity, Il2CppType.Of<Dead>());
+				HorseUtil.KillWithNoDrops(horse.Entity);
 				ctx.Reply($"Horse removed.");
 			}
 
@@ -309,16 +306,32 @@ public static partial class Commands
 				foreach (var horse in horses)
 				{
 					if (remaining == 0) break;
-					horse.With((ref Health t) =>
-					{
-						t.IsDead = true;
-					});
-					VWorld.Server.EntityManager.AddComponent(horse, Il2CppType.Of<Dead>());
+					HorseUtil.KillWithNoDrops(horse);
 					remaining--;
 				}
 
 				ctx.Reply($"Removed {toRemove} horses.");
 			}
+
+			[Command("famish", adminOnly: true)]
+			public void Famish(ChatCommandContext ctx, float radius = 5f)
+			{
+				var horses = HorseUtil.ClosestHorses(ctx.Event.SenderCharacterEntity, radius);
+				int hungryCount = 0;
+				foreach (var horse in horses)
+				{
+					if (!horse.Has<FeedableInventory>()) continue;
+
+					horse.With((ref FeedableInventory t) =>
+					{
+						t.FeedProgressTime = 0;
+						hungryCount++;
+					});
+				}
+
+				ctx.Reply($"{hungryCount} horses have been made hungry.");
+			}
+
 		}
 	}
 }

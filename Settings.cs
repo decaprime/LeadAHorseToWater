@@ -39,7 +39,7 @@ public static class Settings
 
 		// Breeding
 		HORSE_BREED_PREFAB = config.Bind<int>("Breeding", "BreedingRequiredItem", -570287766, "This prefab is consumed as a cost to breed horses.");
-		HORSE_BREED_ITEM_NAME = config.Bind<string>("Breeding", "BreedingCostItemName", "special fish", "This is the name of the required item that will be consumed.");
+		HORSE_BREED_ITEM_NAME = config.Bind<string>("Breeding", "BreedingCostItemName", "special fish (twilight snapper)", "This is the name of the required item that will be consumed.");
 		HORSE_BREED_COST = config.Bind<int>("Breeding", "BreedingCostAmount", 1, "This is the amount of the required item consumed.");
 
 		HORSE_BREED_MUTATION_RANGE = config.Bind<float>("Breeding", "MutationRange", 0.05f, "This is the half range +/- this value for applied for mutation.");
